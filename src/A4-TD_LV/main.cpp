@@ -30,66 +30,18 @@
 #include <imgui_impl_sdl.h>
 #include <imgui_impl_sdlrenderer.h>
 
-entt::entity CreateBox(entt::registry& registry, std::shared_ptr<CollisionShape> shape);
 entt::entity CreateCamera(entt::registry& registry);
 entt::entity CreateHouse(entt::registry& registry);
-entt::entity CreateRunner(entt::registry& registry, std::shared_ptr<Spritesheet> spritesheet);
 
 void EntityInspector(const char* windowName, entt::registry& registry, entt::entity entity);
 
 void HandleCameraMovement(entt::registry& registry, entt::entity camera, float deltaTime);
-void HandleRunnerMovement(entt::registry& registry, entt::entity runner, float deltaTime);
-
-struct InputComponent
-{
-	bool left = false;
-	bool right = false;
-	bool jump = false;
-};
-
-struct PlayerControlled {};
-
-void PlayerControllerSystem(entt::registry& registry)
-{
-	auto view = registry.view<RigidBodyComponent, InputComponent>();
-	for (entt::entity entity : view)
-	{
-		auto& entityInput = view.get<InputComponent>(entity);
-		auto& entityPhysics = view.get<RigidBodyComponent>(entity);
-
-		Vector2f velocity = Vector2f(0.f, 0.f);
-		velocity.y = entityPhysics.GetLinearVelocity().y;
-
-		if (entityInput.left)
-			velocity.x -= 500.f;
-
-		if (entityInput.right)
-			velocity.x += 500.f;
-
-		if (entityInput.jump && velocity.y < 1.f)
-			velocity.y = -500.f;
-
-		entityPhysics.SetLinearVelocity(velocity);
-	}
-}
-
-void PlayerInputSystem(entt::registry& registry)
-{
-	auto view = registry.view<PlayerControlled, InputComponent>();
-	for (entt::entity entity : view)
-	{
-		auto& entityInput = view.get<InputComponent>(entity);
-		entityInput.left = InputManager::Instance().IsActive("MoveLeft");
-		entityInput.right = InputManager::Instance().IsActive("MoveRight");
-		entityInput.jump = InputManager::Instance().IsActive("Jump");
-	}
-}
 
 int main()
 {
 	SDLpp sdl;
 
-	SDLppWindow window("A4Engine", 1280, 720);
+	SDLppWindow window("A4Engine", 1600, 900);
 	SDLppRenderer renderer(window, "direct3d11", SDL_RENDERER_PRESENTVSYNC);
 
 	ResourceManager resourceManager(renderer);
@@ -97,9 +49,6 @@ int main()
 
 	SDLppImGui imgui(window, renderer);
 
-	// Si on initialise ImGui dans une DLL (ce que nous faisons avec la classe SDLppImGui) et l'utilisons dans un autre exécutable (DLL/.exe)
-	// la bibliothèque nous demande d'appeler ImGui::SetCurrentContext dans l'exécutable souhaitant utiliser ImGui, avec le contexte précédemment récupéré
-	// Ceci est parce qu'ImGui utilise des variables globales en interne qui ne sont pas partagées entre la .dll et l'exécutable (comme indiqué dans sa documentation)
 	ImGui::SetCurrentContext(imgui.GetContext());
 
 	// ZQSD
@@ -107,17 +56,13 @@ int main()
 	InputManager::Instance().BindKeyPressed(SDLK_d, "MoveRight");
 	InputManager::Instance().BindKeyPressed(SDLK_z, "MoveUp");
 	InputManager::Instance().BindKeyPressed(SDLK_s, "MoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_8, "Move8");
 
 	// Touches directionnelles (caméra)
 	InputManager::Instance().BindKeyPressed(SDLK_LEFT, "CameraMoveLeft");
 	InputManager::Instance().BindKeyPressed(SDLK_RIGHT, "CameraMoveRight");
 	InputManager::Instance().BindKeyPressed(SDLK_UP, "CameraMoveUp");
 	InputManager::Instance().BindKeyPressed(SDLK_DOWN, "CameraMoveDown");
-
-	std::shared_ptr<Spritesheet> spriteSheet = std::make_shared<Spritesheet>();
-	spriteSheet->AddAnimation("idle", 5, 0.1f, Vector2i{ 0, 0 },  Vector2i{ 32, 32 });
-	spriteSheet->AddAnimation("run",  8, 0.1f, Vector2i{ 0, 32 }, Vector2i{ 32, 32 });
-	spriteSheet->AddAnimation("jump", 4, 0.1f, Vector2i{ 0, 64 }, Vector2i{ 32, 32 });
 
 	entt::registry registry;
 
@@ -134,35 +79,8 @@ int main()
 	registry.get<RigidBodyComponent>(house).TeleportTo({ 750.f, 275.f });
 	registry.get<Transform>(house).SetScale({ 2.f, 2.f });
 
-	entt::entity runner = CreateRunner(registry, spriteSheet);
-	registry.get<Transform>(runner).SetPosition({ 300.f, 250.f });
-
-	std::shared_ptr<CollisionShape> boxShape = std::make_shared<BoxShape>(256.f, 256.f);
-	
-	entt::entity box = CreateBox(registry, boxShape);
-	registry.get<RigidBodyComponent>(box).TeleportTo({ 400.f, 400.f }, 15.f);
-
-	InputManager::Instance().BindKeyPressed(SDL_KeyCode::SDLK_r, "PlayRun");
-
-	InputManager::Instance().OnAction("PlayRun", [&](bool pressed)
-	{
-		if (pressed)
-		{
-			entt::entity box2 = CreateBox(registry, boxShape);
-			registry.get<RigidBodyComponent>(box2).TeleportTo({ 400.f, 400.f }, 15.f);
-
-			registry.get<SpritesheetComponent>(runner).PlayAnimation("run");
-		}
-		else
-			registry.get<SpritesheetComponent>(runner).PlayAnimation("idle");
-	});
-
 	// Création du sol
 	std::shared_ptr<CollisionShape> groundShape = std::make_shared<SegmentShape>(Vector2f(0.f, 720.f), Vector2f(10'000.f, 720.f));
-
-	entt::entity groundEntity = registry.create();
-	auto& groundPhysics = registry.emplace<RigidBodyComponent>(groundEntity, RigidBodyComponent::Static{});
-	groundPhysics.AddShape(groundShape);
 	
 	InputManager::Instance().BindKeyPressed(SDLK_SPACE, "Jump");
 
@@ -199,14 +117,9 @@ int main()
 		physicsSystem.Update(deltaTime);
 		renderSystem.Update(deltaTime);
 
-		PlayerInputSystem(registry);
-		PlayerControllerSystem(registry);
-
 		ImGui::LabelText("FPS", "%f", 1.f / deltaTime);
 
-		EntityInspector("Box", registry, box);
 		EntityInspector("Camera", registry, cameraEntity);
-		EntityInspector("Runner", registry, runner);
 
 		physicsSystem.DebugDraw(renderer, registry.get<Transform>(cameraEntity).GetTransformMatrix().Inverse());
 
@@ -247,21 +160,6 @@ void EntityInspector(const char* windowName, entt::registry& registry, entt::ent
 	ImGui::End();
 }
 
-entt::entity CreateBox(entt::registry& registry, std::shared_ptr<CollisionShape> shape)
-{
-	std::shared_ptr<Sprite> box = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/box.png"));
-	box->SetOrigin({ 0.5f, 0.5f });
-
-	entt::entity entity = registry.create();
-	registry.emplace<GraphicsComponent>(entity, std::move(box));
-	registry.emplace<Transform>(entity);
-
-	auto& entityPhysics = registry.emplace<RigidBodyComponent>(entity, 250.f);
-	entityPhysics.AddShape(std::move(shape));
-
-	return entity;
-}
-
 entt::entity CreateCamera(entt::registry& registry)
 {
 	entt::entity entity = registry.create();
@@ -287,58 +185,13 @@ entt::entity CreateHouse(entt::registry& registry)
 	return entity;
 }
 
-entt::entity CreateRunner(entt::registry& registry, std::shared_ptr<Spritesheet> spritesheet)
-{
-	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/runner.png"));
-	sprite->SetOrigin({ 0.5f, 0.5f });
-	sprite->Resize(256, 256);
-	sprite->SetRect(SDL_Rect{ 0, 0, 32, 32 });
-
-	std::shared_ptr<CollisionShape> collider = std::make_shared<BoxShape>(128.f, 256.f);
-
-	entt::entity entity = registry.create();
-	registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
-	registry.emplace<GraphicsComponent>(entity, std::move(sprite));
-	registry.emplace<Transform>(entity);
-	registry.emplace<InputComponent>(entity);
-	registry.emplace<PlayerControlled>(entity);
-
-	auto& entityBody = registry.emplace<RigidBodyComponent>(entity, 80.f, std::numeric_limits<float>::infinity());
-	entityBody.AddShape(collider, Vector2f(0.f, 0.f), false);
-
-	return entity;
-}
-
 void HandleCameraMovement(entt::registry& registry, entt::entity camera, float deltaTime)
 {
 	Transform& cameraTransform = registry.get<Transform>(camera);
-
-	if (InputManager::Instance().IsActive("CameraMoveDown"))
-		cameraTransform.Translate(Vector2f(0.f, 500.f * deltaTime));
 
 	if (InputManager::Instance().IsActive("CameraMoveLeft"))
 		cameraTransform.Translate(Vector2f(-500.f * deltaTime, 0.f));
 
 	if (InputManager::Instance().IsActive("CameraMoveRight"))
 		cameraTransform.Translate(Vector2f(500.f * deltaTime, 0.f));
-
-	if (InputManager::Instance().IsActive("CameraMoveUp"))
-		cameraTransform.Translate(Vector2f(0.f, -500.f * deltaTime));
-}
-
-void HandleRunnerMovement(entt::registry& registry, entt::entity runner, float deltaTime)
-{
-	Transform& transform = registry.get<Transform>(runner);
-
-	if (InputManager::Instance().IsActive("MoveDown"))
-		transform.Translate(Vector2f(0.f, 500.f * deltaTime));
-
-	if (InputManager::Instance().IsActive("MoveLeft"))
-		transform.Translate(Vector2f(-500.f * deltaTime, 0.f));
-
-	if (InputManager::Instance().IsActive("MoveRight"))
-		transform.Translate(Vector2f(500.f * deltaTime, 0.f));
-
-	if (InputManager::Instance().IsActive("MoveUp"))
-		transform.Translate(Vector2f(0.f, -500.f * deltaTime));
 }
