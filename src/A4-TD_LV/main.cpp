@@ -23,6 +23,7 @@
 #include <A4Engine/Transform.hpp>
 #include <A4Engine/VelocityComponent.hpp>
 #include <A4Engine/VelocitySystem.hpp>
+#include <A4Engine/Enemy.hpp>
 #include <chipmunk/chipmunk.h>
 #include <entt/entt.hpp>
 #include <fmt/core.h>
@@ -39,6 +40,35 @@ void HandleCameraMovement(entt::registry& registry, entt::entity camera, float d
 
 int main()
 {
+
+	srand(time(NULL));   // Initialization, should only be called once.
+
+	Enemy enemy1;
+
+	/*bool gameContinue = true;
+
+	while (gameContinue)
+	{
+		int random = rand() % 100;
+
+		enemy1.NextMovement(random);
+
+		std::cout << "enemy1 position = " << enemy1.myTransform.GetPosition() << "\n";
+
+		if (enemy1.myTransform.GetPosition().x > 1600)
+		{
+			gameContinue = false;
+		}
+
+	}*/
+
+	enemy1.WaypointsCalculation();
+
+
+	return 0;
+
+
+
 	SDLpp sdl;
 
 	SDLppWindow window("A4Engine", 1600, 900);
@@ -63,6 +93,30 @@ int main()
 	InputManager::Instance().BindKeyPressed(SDLK_RIGHT, "CameraMoveRight");
 	InputManager::Instance().BindKeyPressed(SDLK_UP, "CameraMoveUp");
 	InputManager::Instance().BindKeyPressed(SDLK_DOWN, "CameraMoveDown");
+
+	//Pose de pièges
+	InputManager::Instance().BindKeyPressed(SDLK_0, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_1, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_2, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_3, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_4, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_5, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_6, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_7, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_8, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_9, "CameraMoveDown");
+
+	InputManager::Instance().BindKeyPressed(SDLK_a, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_z, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_e, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_r, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_t, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_y, "CameraMoveDown");
+
+	std::shared_ptr<Spritesheet> spriteSheet = std::make_shared<Spritesheet>();
+	spriteSheet->AddAnimation("idle", 5, 0.1f, Vector2i{ 0, 0 },  Vector2i{ 32, 32 });
+	spriteSheet->AddAnimation("run",  8, 0.1f, Vector2i{ 0, 32 }, Vector2i{ 32, 32 });
+	spriteSheet->AddAnimation("jump", 4, 0.1f, Vector2i{ 0, 64 }, Vector2i{ 32, 32 });
 
 	entt::registry registry;
 
