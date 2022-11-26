@@ -120,7 +120,7 @@ int main()
 		alSource3f(source, AL_POSITION, ambulancePos.x / 100.f, ambulancePos.y / 100.f, 0.f);
 		alSource3f(source, AL_VELOCITY, velocity.x / 100.f, velocity.y / 100.f, 0.f);
 
-		ambulance.Draw(renderer, cameraTransform, ambulanceTransform);
+		//ambulance.Draw(renderer, cameraTransform, ambulanceTransform);
 
 		renderer.Present();
 	}
