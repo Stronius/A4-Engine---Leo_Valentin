@@ -108,6 +108,17 @@ Vector2<T>& Vector2<T>::operator/=(T value)
 }
 
 template<typename T>
+inline bool Vector2<T>::operator!=(const Vector2& vec)
+{
+	if (vec.x == x && vec.y == y)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+template<typename T>
 Vector2<T> Vector2<T>::Rotate(const Vector2& vec, float degrees)
 {
 	float radRotation = Deg2Rad * degrees;

@@ -11,13 +11,17 @@ class A4ENGINE_API Enemy
 		Transform myTransform;
 		Vector2f myPosition;
 		float myRotation;
+		int currentWaypoint;
+		float moveSpeed;
+		Vector2f direction;
+
 
 		Enemy();
 		~Enemy();
 
 		void WaypointsCalculation();
-		void NextMovement(int random);
-		void ApplyMovement(Vector2f nextPosition);
+		void GoToNextWaypoint(float deltaTime);
+		void Update(float deltaTime);
 
 	private:
 		std::vector<Vector2f> waypoints;

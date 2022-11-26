@@ -23,6 +23,7 @@ struct Vector2
 	Vector2& operator*=(T value);
 	Vector2& operator/=(const Vector2& vec);
 	Vector2& operator/=(T value);
+	bool operator!=(const Vector2& vec);
 
 	static Vector2 Rotate(const Vector2& vec, float degrees);
 

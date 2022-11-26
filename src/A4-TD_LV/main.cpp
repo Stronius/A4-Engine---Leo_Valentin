@@ -33,6 +33,8 @@
 
 entt::entity CreateCamera(entt::registry& registry);
 entt::entity CreateHouse(entt::registry& registry);
+entt::entity CreateEnemy(entt::registry& registry);
+
 
 void EntityInspector(const char* windowName, entt::registry& registry, entt::entity entity);
 
@@ -40,35 +42,6 @@ void HandleCameraMovement(entt::registry& registry, entt::entity camera, float d
 
 int main()
 {
-
-	srand(time(NULL));   // Initialization, should only be called once.
-
-	Enemy enemy1;
-
-	/*bool gameContinue = true;
-
-	while (gameContinue)
-	{
-		int random = rand() % 100;
-
-		enemy1.NextMovement(random);
-
-		std::cout << "enemy1 position = " << enemy1.myTransform.GetPosition() << "\n";
-
-		if (enemy1.myTransform.GetPosition().x > 1600)
-		{
-			gameContinue = false;
-		}
-
-	}*/
-
-	enemy1.WaypointsCalculation();
-
-
-	return 0;
-
-
-
 	SDLpp sdl;
 
 	SDLppWindow window("A4Engine", 1600, 900);
@@ -111,7 +84,6 @@ int main()
 	InputManager::Instance().BindKeyPressed(SDLK_e, "CameraMoveDown");
 	InputManager::Instance().BindKeyPressed(SDLK_r, "CameraMoveDown");
 	InputManager::Instance().BindKeyPressed(SDLK_t, "CameraMoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_y, "CameraMoveDown");
 
 	std::shared_ptr<Spritesheet> spriteSheet = std::make_shared<Spritesheet>();
 	spriteSheet->AddAnimation("idle", 5, 0.1f, Vector2i{ 0, 0 },  Vector2i{ 32, 32 });
@@ -128,6 +100,9 @@ int main()
 	physicsSystem.SetDamping(0.9f);
 
 	entt::entity cameraEntity = CreateCamera(registry);
+
+	entt::entity enemy1 = CreateEnemy(registry);
+	registry.get<Enemy>(enemy1).myTransform.SetPosition({ 192.f, 192.f });
 
 	entt::entity house = CreateHouse(registry);
 	registry.get<RigidBodyComponent>(house).TeleportTo({ 750.f, 275.f });
@@ -166,10 +141,17 @@ int main()
 		HandleCameraMovement(registry, cameraEntity, deltaTime);
 		//HandleRunnerMovement(registry, runner, deltaTime);
 
+
+		registry.get<Enemy>(enemy1).Update(deltaTime);
+
+		registry.get<Transform>(enemy1).SetPosition(registry.get<Enemy>(enemy1).myTransform.GetPosition());
+
 		animSystem.Update(deltaTime);
 		velocitySystem.Update(deltaTime);
 		physicsSystem.Update(deltaTime);
 		renderSystem.Update(deltaTime);
+
+
 
 		ImGui::LabelText("FPS", "%f", 1.f / deltaTime);
 
@@ -235,6 +217,18 @@ entt::entity CreateHouse(entt::registry& registry)
 
 	auto& entityPhysics = registry.emplace<RigidBodyComponent>(entity, RigidBodyComponent::Static{});
 	entityPhysics.AddShape(std::move(collider));
+
+	return entity;
+}
+
+entt::entity CreateEnemy(entt::registry& registry)
+{
+	std::shared_ptr<Sprite> enemySprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Enemy.png"));
+	entt::entity entity = registry.create();
+	registry.emplace<GraphicsComponent>(entity, std::move(enemySprite));
+	auto& transform = registry.emplace<Transform>(entity);
+	auto& enemy = registry.emplace<Enemy>(entity);
+	enemy.myTransform = transform;
 
 	return entity;
 }
