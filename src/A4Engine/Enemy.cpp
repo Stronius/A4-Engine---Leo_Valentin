@@ -6,7 +6,7 @@
 Enemy::Enemy()
 {
 	myTransform = Transform();
-	myTransform.SetPosition({ 128, 128 });
+	myTransform.SetPosition({ 128.f,128.f });
 	myPosition = Vector2f(0, 0);
 	myRotation = 0;
 	currentWaypoint = 0;
@@ -33,7 +33,6 @@ void Enemy::WaypointsCalculation()
 	while (keepOnSearching)
 	{
 		int forwardOrNot = rand() % 100;
-		
 
 		if (forwardOrNot >= 50)
 		{
@@ -57,13 +56,10 @@ void Enemy::WaypointsCalculation()
 			if (tempY == 128)
 			{
 				goUp = false;
-				std::cout << "Ne peut pas aller plus haut \n";
-
 			}
 			else if (tempY == (128 * 5))
 			{
 				goUp = true;
-				std::cout << "Ne peut pas aller plus BAS \n";
 			}
 
 			if (goUp)
@@ -101,12 +97,10 @@ void Enemy::GoToNextWaypoint(float deltaTime)
 			return;
 		}
 		currentWaypoint++;
-		//std::cout << "Prochain waypoints" << std::endl;
 		direction = (waypoints[currentWaypoint] - myTransform.GetPosition()) * deltaTime * moveSpeed;
 	}
 	else
 	{
-		//std::cout << "enemy1 position = " << myTransform.GetPosition() << std::endl;
 		myTransform.Translate(direction);
 	}
 }
