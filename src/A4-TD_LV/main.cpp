@@ -24,6 +24,7 @@
 #include <A4Engine/VelocityComponent.hpp>
 #include <A4Engine/VelocitySystem.hpp>
 #include <A4Engine/Enemy.hpp>
+#include <A4Engine/GameManager.hpp>
 #include <chipmunk/chipmunk.h>
 #include <entt/entt.hpp>
 #include <fmt/core.h>
@@ -49,6 +50,7 @@ int main()
 
 	ResourceManager resourceManager(renderer);
 	InputManager inputManager;
+	GameManager gameManager;
 
 	SDLppImGui imgui(window, renderer);
 
@@ -142,9 +144,11 @@ int main()
 		//HandleRunnerMovement(registry, runner, deltaTime);
 
 
-		registry.get<Enemy>(enemy1).Update(deltaTime);
-
-		registry.get<Transform>(enemy1).SetPosition(registry.get<Enemy>(enemy1).myTransform.GetPosition());
+		if (!gameManager.isPause)
+		{
+			registry.get<Enemy>(enemy1).Update(deltaTime);
+			registry.get<Transform>(enemy1).SetPosition(registry.get<Enemy>(enemy1).myTransform.GetPosition());
+		}
 
 		animSystem.Update(deltaTime);
 		velocitySystem.Update(deltaTime);
