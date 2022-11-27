@@ -34,6 +34,7 @@
 
 entt::entity CreateCamera(entt::registry& registry);
 entt::entity CreateHouse(entt::registry& registry);
+entt::entity CreateBackground(entt::registry& registry);
 entt::entity CreateEnemy(entt::registry& registry);
 
 
@@ -104,7 +105,9 @@ int main()
 	entt::entity cameraEntity = CreateCamera(registry);
 
 	entt::entity enemy1 = CreateEnemy(registry);
-	registry.get<Enemy>(enemy1).myTransform.SetPosition({ 192.f, 192.f });
+	registry.get<Enemy>(enemy1).myTransform.SetPosition({ 128.f, 128.f });
+
+	entt::entity background = CreateBackground(registry);
 
 	entt::entity house = CreateHouse(registry);
 	registry.get<RigidBodyComponent>(house).TeleportTo({ 750.f, 275.f });
@@ -225,14 +228,24 @@ entt::entity CreateHouse(entt::registry& registry)
 	return entity;
 }
 
+entt::entity CreateBackground(entt::registry& registry)
+{
+	std::shared_ptr<Sprite> background = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/LevelLayout.png"));
+
+	entt::entity entity = registry.create();
+	registry.emplace<GraphicsComponent>(entity, std::move(background));
+	auto& transform = registry.emplace<Transform>(entity);
+
+	return entity;
+}
+
 entt::entity CreateEnemy(entt::registry& registry)
 {
 	std::shared_ptr<Sprite> enemySprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Enemy.png"));
 	entt::entity entity = registry.create();
 	registry.emplace<GraphicsComponent>(entity, std::move(enemySprite));
-	auto& transform = registry.emplace<Transform>(entity);
-	auto& enemy = registry.emplace<Enemy>(entity);
-	enemy.myTransform = transform;
+	registry.emplace<Transform>(entity);
+	registry.emplace<Enemy>(entity);
 
 	return entity;
 }
