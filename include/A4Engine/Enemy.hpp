@@ -17,6 +17,7 @@ class A4ENGINE_API Enemy
 
 
 		Enemy();
+		Enemy(Vector2f pos);
 		~Enemy();
 
 		void WaypointsCalculation();

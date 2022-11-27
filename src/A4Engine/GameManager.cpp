@@ -1,7 +1,13 @@
+#include <iostream>
 #include <A4Engine/GameManager.hpp>
 #include <A4Engine/ResourceManager.hpp>
 #include <A4Engine/Sprite.hpp>
 #include <A4Engine/GraphicsComponent.hpp>
+#include <A4Engine/SpriteSheet.hpp>
+#include <A4Engine/SpriteSheetComponent.hpp>
+#include <A4Engine/Lavatrap.hpp>
+
+
 
 
 
@@ -15,6 +21,10 @@ my_registry(registry)
 	isPause = false;
 	referenceTimerSpawn = 2.f;
 	timerSpawn = 0;
+	enemyList = std::vector<Enemy>();
+
+	CreateTrap({ 576,576 });
+	CreateEnemy({ 192.f,128 * 5 + 64 });
 }
 
 GameManager::~GameManager()
@@ -49,6 +59,31 @@ void GameManager::EnemiesMovement(float deltaTime)
 	}
 }
 
+void GameManager::TrapDetection()
+{
+	auto view = my_registry.view<LavaTrap>();
+	for (entt::entity entity : view)
+	{
+		LavaTrap& LavaScript = view.get<LavaTrap>(entity);
+		//Transform& LavaTransform = view.get<Transform>(entity);
+		LavaScript.Update();
+		//LavaTransform = LavaScript.myTransform;
+	}
+}
+
+void GameManager::CheckEnemyTraped(Vector2f trapPosition)
+{
+	auto it = enemyList.begin();
+	if (it != enemyList.end())
+	{
+		if (abs(trapPosition.x - it->myTransform.GetPosition().x) <= 128 && abs(trapPosition.y - it->myTransform.GetPosition().y) <= 128)
+		{
+			std::cout << "enemy Detected" << std::endl;
+		}
+	}
+
+}
+
 void GameManager::CheckForSpawn(float deltaTime)
 {
 	if (timerSpawn > 0)
@@ -57,25 +92,51 @@ void GameManager::CheckForSpawn(float deltaTime)
 	}
 	else
 	{
-		CreateEnemy();
+		//CreateEnemy({ 128.f,128.f });
 		timerSpawn = referenceTimerSpawn;
 	}
 }
 
 
-void GameManager::CreateEnemy()
+void GameManager::CreateEnemy(Vector2f pos)
 {
-	std::shared_ptr<Sprite> enemySprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Enemy.png"));
+	std::shared_ptr<Sprite> enemySprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Enemy.png"),2);
 	entt::entity entity = my_registry.create();
+	enemySprite->SetOrigin({ 0.5f, 0.5f });
 	my_registry.emplace<GraphicsComponent>(entity, std::move(enemySprite));
 	my_registry.emplace<Transform>(entity);
-	my_registry.emplace<Enemy>(entity);
+	Enemy& enemyScript = my_registry.emplace<Enemy>(entity, pos);
+
+	enemyList.push_back(enemyScript);
+}
+
+void GameManager::CreateTrap(Vector2f pos)
+{
+	std::shared_ptr<Spritesheet> spritesheet = std::make_shared<Spritesheet>();
+	spritesheet->AddAnimation("idle", 1, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
+	spritesheet->AddAnimation("open", 5, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
+	spritesheet->AddAnimation("close", 5, 100, Vector2i{ 0, 128 }, Vector2i{ 128, 128 });
+
+	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Trapdoor_Open.png"),1);
+	sprite->SetOrigin({ 0.5f, 0.5f });
+	sprite->Resize(128, 128);
+	sprite->SetRect(SDL_Rect{ 0, 0, 128, 128 });
+
+	entt::entity entity = my_registry.create();
+	my_registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
+	my_registry.emplace<GraphicsComponent>(entity, std::move(sprite));
+	auto& transform = my_registry.emplace<Transform>(entity);
+	auto& trapScript = my_registry.emplace<LavaTrap>(entity);
+	transform.SetPosition(pos);
+	trapScript.myPosition = transform.GetPosition();
+
 }
 
 void GameManager::Update(float deltaTime)
 {
 	EnemiesMovement(deltaTime);
 	CheckForSpawn(deltaTime);
+	TrapDetection();
 }
 
 GameManager& GameManager::Instance()

@@ -10,10 +10,25 @@ Enemy::Enemy()
 	myPosition = Vector2f(0, 0);
 	myRotation = 0;
 	currentWaypoint = 0;
-	moveSpeed = 2.f;
+	moveSpeed = 1.f;
+
 	WaypointsCalculation();
-	direction = Vector2f(0, 0);
-	direction = (waypoints[currentWaypoint] - myTransform.GetPosition()) * 0.01f;
+
+	direction = (waypoints[currentWaypoint] - myTransform.GetPosition()) * 0.014;
+
+}
+
+Enemy::Enemy(Vector2f pos)
+{
+	myTransform = Transform();
+	myTransform.SetPosition(pos);
+	myPosition = Vector2f(0, 0);
+	myRotation = 0;
+	currentWaypoint = 0;
+	moveSpeed = 1.f;
+
+	WaypointsCalculation();
+	direction = (waypoints[currentWaypoint] - myTransform.GetPosition()) * 0.014;
 
 }
 
@@ -26,8 +41,8 @@ void Enemy::WaypointsCalculation()
 {
 	srand(time(NULL));
 
-	int tempX = 128;
-	int tempY = 128;
+	int tempX = myTransform.GetPosition().x;
+	int tempY = myTransform.GetPosition().y;
 
 	bool keepOnSearching = true;
 	while (keepOnSearching)
@@ -53,11 +68,11 @@ void Enemy::WaypointsCalculation()
 				goUp = false;
 			}
 
-			if (tempY == 128)
+			if (tempY == 192) //clamp haut
 			{
 				goUp = false;
 			}
-			else if (tempY == (128 * 5))
+			else if (tempY == (128 * 5) + 64) //clamp bas
 			{
 				goUp = true;
 			}
@@ -90,6 +105,10 @@ void Enemy::GoToNextWaypoint(float deltaTime)
 	
 	if (abs(myTransform.GetPosition().x - waypoints[currentWaypoint].x) <= 5 && abs(myTransform.GetPosition().y - waypoints[currentWaypoint].y) <= 5)
 	{
+		if (deltaTime <= 0)
+		{
+			return;
+		}
 		if (currentWaypoint >= waypoints.size())
 		{
 			direction = Vector2f(0, 0);

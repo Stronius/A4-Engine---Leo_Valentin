@@ -16,6 +16,7 @@ class A4ENGINE_API GameManager
 		float referenceTimerSpawn;
 		float timerSpawn;
 		bool spawnEnemy;
+		std::vector<Enemy> enemyList;
 
 		GameManager(entt::registry& registry);
 		GameManager(const GameManager&) = delete;
@@ -26,8 +27,14 @@ class A4ENGINE_API GameManager
 		void Victory();
 		void Lose();
 		void EnemiesMovement(float deltaTime);
+		void TrapDetection();
+
+
+		void CheckEnemyTraped(Vector2f trapPosition);
+
 		void CheckForSpawn(float deltaTime);
-		void CreateEnemy();
+		void CreateEnemy(Vector2f pos);
+		void CreateTrap(Vector2f pos);
 
 		void Update(float deltaTime);
 
@@ -36,6 +43,5 @@ class A4ENGINE_API GameManager
 
 	private:
 
-		std::vector<Enemy> enemyList;
 		static GameManager* my_instance;
 };

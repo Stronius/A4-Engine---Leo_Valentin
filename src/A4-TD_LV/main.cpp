@@ -25,6 +25,7 @@
 #include <A4Engine/VelocitySystem.hpp>
 #include <A4Engine/Enemy.hpp>
 #include <A4Engine/GameManager.hpp>
+#include <A4Engine/LavaTrap.hpp>
 #include <chipmunk/chipmunk.h>
 #include <entt/entt.hpp>
 #include <fmt/core.h>
@@ -104,12 +105,12 @@ int main()
 
 	entt::entity cameraEntity = CreateCamera(registry);
 
-	entt::entity enemy1 = CreateEnemy(registry);
-	registry.get<Enemy>(enemy1).myTransform.SetPosition({ 128.f, 128.f });
+	/*entt::entity enemy1 = CreateEnemy(registry);
+	registry.get<Enemy>(enemy1).myTransform.SetPosition({ 128.f, 128.f });*/
 
-	entt::entity trapdoor = CreateTrap(registry, { 512, 512 });
+	//entt::entity trapdoor = CreateTrap(registry, { 512, 512 });
 
-	//entt::entity background = CreateBackground(registry);
+	entt::entity background = CreateBackground(registry);
 	
 	InputManager::Instance().BindKeyPressed(SDLK_SPACE, "Jump");
 
@@ -150,6 +151,7 @@ int main()
 
 
 		gameManager.Update(deltaTime);
+
 
 		animSystem.Update(deltaTime);
 		velocitySystem.Update(deltaTime);
@@ -240,7 +242,7 @@ entt::entity CreateTrap(entt::registry& registry, Vector2f pos)
 	spritesheet->AddAnimation("open", 5, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
 	spritesheet->AddAnimation("close", 5, 100, Vector2i{ 0, 128 }, Vector2i{ 128, 128 });
 
-	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Trapdoor_Open.png"));
+	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Trapdoor_Open.png"),1);
 	sprite->SetOrigin({ 0.f, 0.f });
 	sprite->Resize(128, 128);
 	sprite->SetRect(SDL_Rect{ 0, 0, 128, 128 });
@@ -249,6 +251,7 @@ entt::entity CreateTrap(entt::registry& registry, Vector2f pos)
 	registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
 	registry.emplace<GraphicsComponent>(entity, std::move(sprite));
 	auto& transform = registry.emplace<Transform>(entity);
+	registry.emplace<LavaTrap>(entity);
 	transform.SetPosition(pos);
 
 	return entity;
