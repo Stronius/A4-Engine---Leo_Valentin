@@ -14,4 +14,6 @@ class A4ENGINE_API Renderable // interface
 		virtual ~Renderable() = default;
 
 		virtual void Draw(SDLppRenderer& renderer, const Matrix3f& matrix) = 0;
+
+		int orderLayer;
 };

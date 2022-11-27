@@ -36,12 +36,21 @@ void RenderSystem::Update(float /*deltaTime*/)
 		fmt::print(stderr, fg(fmt::color::red), "warning: no camera found\n");
 
 	auto view = m_registry.view<Transform, GraphicsComponent>();
-	for (entt::entity entity : view)
-	{
-		Transform& entityTransform = view.get<Transform>(entity);
-		GraphicsComponent& entityGraphics = view.get<GraphicsComponent>(entity);
 
-		Matrix3f entityMatrix = entityTransform.GetTransformMatrix();
-		entityGraphics.renderable->Draw(m_renderer, cameraMatrix * entityMatrix);
+	int i = -3;
+	while (i < 3)
+	{
+		for (entt::entity entity : view)
+		{
+			Transform& entityTransform = view.get<Transform>(entity);
+			GraphicsComponent& entityGraphics = view.get<GraphicsComponent>(entity);
+
+			if (entityGraphics.renderable->orderLayer == i) {
+				Matrix3f entityMatrix = entityTransform.GetTransformMatrix();
+				entityGraphics.renderable->Draw(m_renderer, cameraMatrix * entityMatrix);
+			}
+		}
+
+		i++;
 	}
 }

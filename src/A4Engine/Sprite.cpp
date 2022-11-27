@@ -6,6 +6,13 @@
 Sprite::Sprite(std::shared_ptr<const SDLppTexture> texture) :
 Sprite(std::move(texture), texture->GetRect())
 {
+	orderLayer = 0;
+}
+
+Sprite::Sprite(std::shared_ptr<const SDLppTexture> texture, int layer) :
+Sprite(std::move(texture), texture->GetRect())
+{
+	orderLayer = layer;
 }
 
 Sprite::Sprite(std::shared_ptr<const SDLppTexture> texture, const SDL_Rect& rect) :
@@ -15,6 +22,17 @@ m_origin(0.f, 0.f),
 m_width(rect.w),
 m_height(rect.h)
 {
+	orderLayer = 0;
+}
+
+Sprite::Sprite(std::shared_ptr<const SDLppTexture> texture, const SDL_Rect& rect, int layer) :
+m_texture(std::move(texture)),
+m_rect(rect),
+m_origin(0.f, 0.f),
+m_width(rect.w),
+m_height(rect.h)
+{
+	orderLayer = layer;
 }
 
 void Sprite::Draw(SDLppRenderer& renderer, const Matrix3f& matrix)

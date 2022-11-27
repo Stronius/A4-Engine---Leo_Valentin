@@ -14,7 +14,9 @@ class A4ENGINE_API Sprite : public Renderable // Une portion d'une texture
 {
 	public:
 		Sprite(std::shared_ptr<const SDLppTexture> texture);
+		Sprite(std::shared_ptr<const SDLppTexture> texture, int layer);
 		Sprite(std::shared_ptr<const SDLppTexture> texture, const SDL_Rect& rect);
+		Sprite(std::shared_ptr<const SDLppTexture> texture, const SDL_Rect& rect, int layer);
 		Sprite(const Sprite&) = default;
 		Sprite(Sprite&&) = default;
 		~Sprite() = default;
