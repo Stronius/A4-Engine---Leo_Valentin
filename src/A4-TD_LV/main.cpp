@@ -51,7 +51,6 @@ int main()
 
 	ResourceManager resourceManager(renderer);
 	InputManager inputManager;
-	GameManager gameManager;
 
 	SDLppImGui imgui(window, renderer);
 
@@ -95,6 +94,7 @@ int main()
 
 	entt::registry registry;
 
+	GameManager gameManager(registry);
 	AnimationSystem animSystem(registry);
 	RenderSystem renderSystem(renderer, registry);
 	VelocitySystem velocitySystem(registry);
@@ -109,7 +109,7 @@ int main()
 
 	entt::entity trapdoor = CreateTrap(registry, { 512, 512 });
 
-	entt::entity background = CreateBackground(registry);
+	//entt::entity background = CreateBackground(registry);
 	
 	InputManager::Instance().BindKeyPressed(SDLK_SPACE, "Jump");
 
@@ -148,11 +148,8 @@ int main()
 			std::cout << "Released" << std::endl;
 
 
-		if (!gameManager.isPause)
-		{
-			registry.get<Enemy>(enemy1).Update(deltaTime);
-			registry.get<Transform>(enemy1).SetPosition(registry.get<Enemy>(enemy1).myTransform.GetPosition());
-		}
+
+		gameManager.Update(deltaTime);
 
 		animSystem.Update(deltaTime);
 		velocitySystem.Update(deltaTime);
