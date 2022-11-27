@@ -101,12 +101,12 @@ void Enemy::GoToNextWaypoint(float deltaTime)
 			return;
 		}
 		currentWaypoint++;
-		std::cout << "Prochain waypoints" << std::endl;
+		//std::cout << "Prochain waypoints" << std::endl;
 		direction = (waypoints[currentWaypoint] - myTransform.GetPosition()) * deltaTime * moveSpeed;
 	}
 	else
 	{
-		std::cout << "enemy1 position = " << myTransform.GetPosition() << std::endl;
+		//std::cout << "enemy1 position = " << myTransform.GetPosition() << std::endl;
 		myTransform.Translate(direction);
 	}
 }

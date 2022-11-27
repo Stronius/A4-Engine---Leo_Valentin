@@ -33,9 +33,9 @@
 #include <imgui_impl_sdlrenderer.h>
 
 entt::entity CreateCamera(entt::registry& registry);
-entt::entity CreateHouse(entt::registry& registry);
 entt::entity CreateBackground(entt::registry& registry);
 entt::entity CreateEnemy(entt::registry& registry);
+entt::entity CreateTrap(entt::registry& registry, Vector2f pos);
 
 
 void EntityInspector(const char* windowName, entt::registry& registry, entt::entity entity);
@@ -107,14 +107,9 @@ int main()
 	entt::entity enemy1 = CreateEnemy(registry);
 	registry.get<Enemy>(enemy1).myTransform.SetPosition({ 128.f, 128.f });
 
+	entt::entity trapdoor = CreateTrap(registry, { 512, 512 });
+
 	entt::entity background = CreateBackground(registry);
-
-	entt::entity house = CreateHouse(registry);
-	registry.get<RigidBodyComponent>(house).TeleportTo({ 750.f, 275.f });
-	registry.get<Transform>(house).SetScale({ 2.f, 2.f });
-
-	// Création du sol
-	std::shared_ptr<CollisionShape> groundShape = std::make_shared<SegmentShape>(Vector2f(0.f, 720.f), Vector2f(10'000.f, 720.f));
 	
 	InputManager::Instance().BindKeyPressed(SDLK_SPACE, "Jump");
 
@@ -126,7 +121,7 @@ int main()
 		Uint64 now = SDL_GetPerformanceCounter();
 		float deltaTime = (float) (now - lastUpdate) / SDL_GetPerformanceFrequency();
 		lastUpdate = now;
-
+		
 		SDL_Event event;
 		while (SDLpp::PollEvent(&event))
 		{
@@ -146,6 +141,12 @@ int main()
 		HandleCameraMovement(registry, cameraEntity, deltaTime);
 		//HandleRunnerMovement(registry, runner, deltaTime);
 
+		
+		if (InputManager::Instance().IsPressed("Jump"))
+			std::cout << "Pressed" << std::endl;
+		if (InputManager::Instance().IsReleased("Jump"))
+			std::cout << "Released" << std::endl;
+
 
 		if (!gameManager.isPause)
 		{
@@ -157,6 +158,7 @@ int main()
 		velocitySystem.Update(deltaTime);
 		physicsSystem.Update(deltaTime);
 		renderSystem.Update(deltaTime);
+		InputManager::Instance().Update();
 
 
 
@@ -212,22 +214,6 @@ entt::entity CreateCamera(entt::registry& registry)
 	return entity;
 }
 
-entt::entity CreateHouse(entt::registry& registry)
-{
-	std::shared_ptr<Model> house = ResourceManager::Instance().GetModel("assets/house.model");
-
-	std::shared_ptr<CollisionShape> collider = std::make_shared<ConvexShape>(*house, Matrix3f::Scale({ 2.f, 2.f }));
-
-	entt::entity entity = registry.create();
-	registry.emplace<GraphicsComponent>(entity, std::move(house));
-	registry.emplace<Transform>(entity);
-
-	auto& entityPhysics = registry.emplace<RigidBodyComponent>(entity, RigidBodyComponent::Static{});
-	entityPhysics.AddShape(std::move(collider));
-
-	return entity;
-}
-
 entt::entity CreateBackground(entt::registry& registry)
 {
 	std::shared_ptr<Sprite> background = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/LevelLayout.png"));
@@ -246,6 +232,27 @@ entt::entity CreateEnemy(entt::registry& registry)
 	registry.emplace<GraphicsComponent>(entity, std::move(enemySprite));
 	registry.emplace<Transform>(entity);
 	registry.emplace<Enemy>(entity);
+
+	return entity;
+}
+
+entt::entity CreateTrap(entt::registry& registry, Vector2f pos)
+{
+	std::shared_ptr<Spritesheet> spritesheet = std::make_shared<Spritesheet>();
+	spritesheet->AddAnimation("idle", 1, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
+	spritesheet->AddAnimation("open", 5, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
+	spritesheet->AddAnimation("close", 5, 100, Vector2i{ 0, 128 }, Vector2i{ 128, 128 });
+
+	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Trapdoor_Open.png"));
+	sprite->SetOrigin({ 0.f, 0.f });
+	sprite->Resize(128, 128);
+	sprite->SetRect(SDL_Rect{ 0, 0, 128, 128 });
+
+	entt::entity entity = registry.create();
+	registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
+	registry.emplace<GraphicsComponent>(entity, std::move(sprite));
+	auto& transform = registry.emplace<Transform>(entity);
+	transform.SetPosition(pos);
 
 	return entity;
 }

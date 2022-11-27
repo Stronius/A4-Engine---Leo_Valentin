@@ -41,8 +41,17 @@ class A4ENGINE_API InputManager
 		// Renvoie vrai si l'action est en cours
 		bool IsActive(const std::string& action) const;
 
+		// Renvoie vrai si l'action a été réalisée cette frame
+		bool IsPressed(const std::string& action) const;
+
+		// Renvoie vrai si l'action vient d'être relaché cette frame
+		bool IsReleased(const std::string& action) const;
+
 		// Lorsque l'action "action" se déclenche, on appellera "func"
 		void OnAction(std::string action, std::function<void(bool)> func);
+
+		//Remet les pressed et released en false pour qu'il ne dure qu'une frame
+		void Update();
 
 		InputManager& operator=(const InputManager&) = delete;
 		InputManager& operator=(InputManager&&) = delete;
@@ -54,6 +63,8 @@ class A4ENGINE_API InputManager
 		{
 			std::function<void(bool)> func;
 			bool isActive;
+			bool isPressed;
+			bool isReleased;
 		};
 
 		ActionData& GetActionData(const std::string& action);

@@ -42,14 +42,22 @@ void SpritesheetComponent::Update(float elapsedTime)
 
 	const Spritesheet::Animation& anim = m_spritesheet->GetAnimation(m_currentAnimation);
 
+	float duration = anim.frameDuration;
+	if (duration >= 99)
+		duration = 0.1;
+
 	m_timeAccumulator += elapsedTime;
-	while (m_timeAccumulator >= anim.frameDuration)
+	while (m_timeAccumulator >= duration)
 	{
-		m_timeAccumulator -= anim.frameDuration;
+		m_timeAccumulator -= duration;
+
+		m_currentFrameIndex++;
 
 		// On fait boucler l'animation
-		if (++m_currentFrameIndex >= anim.frameCount)
+		if (m_currentFrameIndex >= anim.frameCount && anim.frameDuration < 99)
 			m_currentFrameIndex = 0;
+		else if (m_currentFrameIndex >= anim.frameCount && anim.frameDuration > 99)		//C'est terrible mais rajouter un boolean dans la struct Animation provoque des erreurs du futur
+			return;																		//Du coup j'ai fait avec ce que j'avais pour pas que ca loop
 
 		SDL_Rect rect;
 		rect.x = anim.start.x + anim.size.x * m_currentFrameIndex;

@@ -167,7 +167,7 @@ int main()
 	InputManager::Instance().BindKeyPressed(SDLK_SPACE, "Jump");
 
 	Uint64 lastUpdate = SDL_GetPerformanceCounter();
-
+		
 	bool isOpen = true;
 	while (isOpen)
 	{

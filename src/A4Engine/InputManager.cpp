@@ -55,6 +55,7 @@ void InputManager::ClearBindings()
 
 void InputManager::HandleEvent(const SDL_Event& event)
 {
+
 	switch (event.type)
 	{
 		case SDL_CONTROLLERBUTTONDOWN:
@@ -123,10 +124,43 @@ bool InputManager::IsActive(const std::string& action) const
 	return actionData.isActive;
 }
 
+bool InputManager::IsPressed(const std::string& action) const
+{
+	auto it = m_actions.find(action);
+	if (it == m_actions.end())
+		return false;
+
+	const ActionData& actionData = it->second;
+	return actionData.isPressed;
+}
+
+bool InputManager::IsReleased(const std::string& action) const
+{
+	auto it = m_actions.find(action);
+	if (it == m_actions.end())
+		return false;
+
+	const ActionData& actionData = it->second;
+	return actionData.isReleased;
+}
+
 void InputManager::OnAction(std::string action, std::function<void(bool)> func)
 {
 	ActionData& actionData = GetActionData(action);
 	actionData.func = std::move(func);
+}
+
+void InputManager::Update()
+{
+	auto it = m_actions.begin();
+	if (it != m_actions.end())
+	{
+		if (it->second.isPressed)
+			it->second.isPressed = false;
+
+		if (it->second.isReleased)
+			it->second.isReleased = false;
+	}
 }
 
 InputManager& InputManager::Instance()
@@ -154,7 +188,14 @@ InputManager::ActionData& InputManager::GetActionData(const std::string& action)
 void InputManager::TriggerAction(const std::string& action)
 {
 	ActionData& actionData = GetActionData(action);
+	
+	if (!actionData.isActive) 
+	{
+		actionData.isPressed = true;
+	}
+
 	actionData.isActive = true;
+
 	if (actionData.func)
 		actionData.func(true);
 }
@@ -162,7 +203,14 @@ void InputManager::TriggerAction(const std::string& action)
 void InputManager::ReleaseAction(const std::string& action)
 {
 	ActionData& actionData = GetActionData(action);
+
+	if (actionData.isActive) 
+	{
+		actionData.isReleased = true;
+	}
+
 	actionData.isActive = false;
+
 	if (actionData.func)
 		actionData.func(false);
 }
