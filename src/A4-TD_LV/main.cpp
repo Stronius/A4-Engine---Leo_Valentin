@@ -240,7 +240,7 @@ entt::entity CreateTrap(entt::registry& registry, Vector2f pos)
 	registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
 	registry.emplace<GraphicsComponent>(entity, std::move(sprite));
 	auto& transform = registry.emplace<Transform>(entity);
-	registry.emplace<LavaTrap>(entity);
+	registry.emplace<LavaTrap>(entity, entity);
 	transform.SetPosition(pos);
 
 	return entity;

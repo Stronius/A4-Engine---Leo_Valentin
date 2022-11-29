@@ -9,12 +9,13 @@
 class LavaTrap
 {
 	public:
+		entt::entity gameObject;
 		Vector2f myPosition;
 		bool enemyDetected;
 		bool isActive;
 		float cooldown;
 
-		LavaTrap();
+		LavaTrap(entt::entity gameObject);
 		~LavaTrap();
 
 		void Update();

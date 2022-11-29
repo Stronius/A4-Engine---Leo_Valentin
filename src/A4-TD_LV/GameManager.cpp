@@ -113,9 +113,9 @@ void GameManager::CreateEnemy(Vector2f pos)
 void GameManager::CreateTrap(Vector2f pos)
 {
 	std::shared_ptr<Spritesheet> spritesheet = std::make_shared<Spritesheet>();
-	spritesheet->AddAnimation("idle", 1, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
-	spritesheet->AddAnimation("open", 5, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
-	spritesheet->AddAnimation("close", 5, 100, Vector2i{ 0, 128 }, Vector2i{ 128, 128 });
+	spritesheet->AddAnimation("Idle", 1, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
+	spritesheet->AddAnimation("Open", 5, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
+	spritesheet->AddAnimation("Close", 5, 100, Vector2i{ 0, 128 }, Vector2i{ 128, 128 });
 
 	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Trapdoor_Anim.png"),1);
 	sprite->SetOrigin({ 0.5f, 0.5f });
@@ -126,7 +126,7 @@ void GameManager::CreateTrap(Vector2f pos)
 	auto& spritesheetComponent = my_registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
 	my_registry.emplace<GraphicsComponent>(entity, std::move(sprite));
 	auto& transform = my_registry.emplace<Transform>(entity);
-	auto& trapScript = my_registry.emplace<LavaTrap>(entity);
+	auto& trapScript = my_registry.emplace<LavaTrap>(entity, entity);
 	transform.SetPosition(pos);
 	trapScript.myPosition = transform.GetPosition();
 
