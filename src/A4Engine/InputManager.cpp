@@ -152,8 +152,7 @@ void InputManager::OnAction(std::string action, std::function<void(bool)> func)
 
 void InputManager::Update()
 {
-	auto it = m_actions.begin();
-	if (it != m_actions.end())
+	for (auto it = m_actions.begin(); it != m_actions.end(); it++)
 	{
 		if (it->second.isPressed)
 			it->second.isPressed = false;
@@ -161,6 +160,16 @@ void InputManager::Update()
 		if (it->second.isReleased)
 			it->second.isReleased = false;
 	}
+
+	/*auto it = m_actions.begin();
+	if (it != m_actions.end())
+	{
+		if (it->second.isPressed)
+			it->second.isPressed = false;
+
+		if (it->second.isReleased)
+			it->second.isReleased = false;
+	}*/
 }
 
 InputManager& InputManager::Instance()
