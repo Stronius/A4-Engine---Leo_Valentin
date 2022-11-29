@@ -6,9 +6,11 @@
 
 LavaTrap::LavaTrap(entt::entity gameObject) :
 myPosition(Vector2f(0, 0)),
-cooldown(3),
+coolDownRemaining(3),
+baseCooldown(3),
 enemyDetected(false),
 isActive(false),
+trapCoolDown(false),
 gameObject(gameObject)
 {
 }
@@ -18,12 +20,19 @@ LavaTrap::~LavaTrap()
 
 }
 
-void LavaTrap::Update()
+void LavaTrap::Update(float deltaTime)
 {
-	Activation();
+	if (trapCoolDown)
+	{
+		Reloading(deltaTime);
+	}
+	else
+	{
+		Activation(deltaTime);
+	}
 }
 
-void LavaTrap::Activation()
+void LavaTrap::Activation(float deltaTime)
 {
 	auto view = GameManager::Instance().my_registry.view<Enemy, Transform>();
 	for (entt::entity entity : view)
@@ -40,6 +49,8 @@ void LavaTrap::Activation()
 
 			GameManager::Instance().my_registry.get<SpritesheetComponent>(gameObject).PlayAnimation("Open");
 			std::cout << "enemy Detected" << std::endl;
+			enemy.isDying = true;
+			trapCoolDown = true;
 		}
 		else if (abs(myPosition.x - enemyTransform.GetPosition().x) > 64 && abs(myPosition.y - enemyTransform.GetPosition().y) > 64 && isActive)	//Faut pas le faire ici sinon il va le faire instant mais c'est juste pour test des trucs
 		{
@@ -55,7 +66,15 @@ void LavaTrap::Activation()
 
 }
 
-void LavaTrap::Reloading()
+void LavaTrap::Reloading(float deltaTime)
 {
-
+	if (coolDownRemaining > 0)
+	{
+		coolDownRemaining -= deltaTime;
+	}
+	else
+	{
+		trapCoolDown = false;
+		coolDownRemaining = baseCooldown;
+	}
 }

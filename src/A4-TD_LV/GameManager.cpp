@@ -7,10 +7,6 @@
 #include <A4Engine/SpriteSheetComponent.hpp>
 #include <A4-TD_LV/Lavatrap.hpp>
 
-
-
-
-
 GameManager::GameManager(entt::registry& registry) :
 my_registry(registry)
 {
@@ -19,11 +15,23 @@ my_registry(registry)
 
 	my_instance = this;
 	isPause = false;
-	referenceTimerSpawn = 2.f;
-	timerSpawn = 0;
+	referenceTimerSpawn = 3.f;
+	timerSpawn = 3;
 	enemyList = std::vector<Enemy>();
+	deleteMeBool = true;
 
 	CreateTrap({ 576,576 });
+	CreateTrap({ 576+128,576+128 });
+	CreateTrap({ 576+128,576-128 });
+	CreateTrap({ 576+256,576 - 256 });
+	CreateTrap({ 576+128,576 - 256 });
+	CreateTrap({ 576+256,576 - 256 });
+	CreateTrap({ 576+128,576 - 256 });
+	CreateTrap({ 576+256,576-256 });
+	CreateEnemy({ 576-128,576 });
+	CreateEnemy({ 192.f,128 * 2 + 64 });
+	CreateEnemy({ 192.f,128 * 3 + 64 });
+	CreateEnemy({ 192.f,128 * 4 + 64 });
 	CreateEnemy({ 192.f,128 * 5 + 64 });
 }
 
@@ -59,14 +67,14 @@ void GameManager::EnemiesMovement(float deltaTime)
 	}
 }
 
-void GameManager::TrapDetection()
+void GameManager::TrapDetection(float deltaTime)
 {
 	auto view = my_registry.view<LavaTrap>();
 	for (entt::entity entity : view)
 	{
 		LavaTrap& LavaScript = view.get<LavaTrap>(entity);
 		//Transform& LavaTransform = view.get<Transform>(entity);
-		LavaScript.Update();
+		LavaScript.Update(deltaTime);
 		//LavaTransform = LavaScript.myTransform;
 	}
 }
@@ -78,7 +86,7 @@ void GameManager::CheckEnemyTraped(Vector2f trapPosition)
 	{
 		if (abs(trapPosition.x - it->myTransform.GetPosition().x) <= 128 && abs(trapPosition.y - it->myTransform.GetPosition().y) <= 128)
 		{
-			std::cout << "enemy Detected" << std::endl;
+			std::cout << "enemy truc" << std::endl;
 		}
 	}
 
@@ -92,7 +100,11 @@ void GameManager::CheckForSpawn(float deltaTime)
 	}
 	else
 	{
-		//CreateEnemy({ 128.f,128.f });
+		if (deleteMeBool)
+		{
+			deleteMeBool = false;
+			//CreateEnemy({ 192.f,128 * 1 + 64 });
+		}
 		timerSpawn = referenceTimerSpawn;
 	}
 }
@@ -105,7 +117,7 @@ void GameManager::CreateEnemy(Vector2f pos)
 	enemySprite->SetOrigin({ 0.5f, 0.5f });
 	my_registry.emplace<GraphicsComponent>(entity, std::move(enemySprite));
 	my_registry.emplace<Transform>(entity);
-	Enemy& enemyScript = my_registry.emplace<Enemy>(entity, pos);
+	Enemy& enemyScript = my_registry.emplace<Enemy>(entity, pos, entity);
 
 	enemyList.push_back(enemyScript);
 }
@@ -136,7 +148,7 @@ void GameManager::Update(float deltaTime)
 {
 	EnemiesMovement(deltaTime);
 	CheckForSpawn(deltaTime);
-	TrapDetection();
+	TrapDetection(deltaTime);
 }
 
 GameManager& GameManager::Instance()

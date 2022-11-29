@@ -16,6 +16,7 @@ class GameManager
 		float timerSpawn;
 		bool spawnEnemy;
 		std::vector<Enemy> enemyList;
+		bool deleteMeBool;
 
 		GameManager(entt::registry& registry);
 		GameManager(const GameManager&) = delete;
@@ -26,7 +27,7 @@ class GameManager
 		void Victory();
 		void Lose();
 		void EnemiesMovement(float deltaTime);
-		void TrapDetection();
+		void TrapDetection(float deltaTime);
 
 
 		void CheckEnemyTraped(Vector2f trapPosition);

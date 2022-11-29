@@ -2,23 +2,9 @@
 #include <time.h>
 #include <stdlib.h>
 #include <iostream>
+#include <A4-TD_LV/GameManager.hpp>
 
-Enemy::Enemy()
-{
-	myTransform = Transform();
-	myTransform.SetPosition({ 128.f,128.f });
-	myPosition = Vector2f(0, 0);
-	myRotation = 0;
-	currentWaypoint = 0;
-	moveSpeed = 1.f;
-
-	WaypointsCalculation();
-
-	direction = (waypoints[currentWaypoint] - myTransform.GetPosition()) * 0.014;
-
-}
-
-Enemy::Enemy(Vector2f pos)
+Enemy::Enemy(Vector2f pos, entt::entity entity)
 {
 	myTransform = Transform();
 	myTransform.SetPosition(pos);
@@ -26,6 +12,8 @@ Enemy::Enemy(Vector2f pos)
 	myRotation = 0;
 	currentWaypoint = 0;
 	moveSpeed = 1.f;
+	isDying = false;
+	myEntity = entity;
 
 	WaypointsCalculation();
 	direction = (waypoints[currentWaypoint] - myTransform.GetPosition()) * 0.014;
@@ -35,6 +23,26 @@ Enemy::Enemy(Vector2f pos)
 Enemy::~Enemy()
 {
 
+}
+
+void Enemy::GetKill()
+{
+	if (myTransform.GetScale().x <= 0.5)
+	{
+		myTransform.SetPosition(Vector2f(0, 0));
+		myTransform.SetScale(Vector2f(1, 1));
+		GameManager::Instance().my_registry.remove<Enemy>(myEntity);
+		GameManager::Instance().my_registry.destroy(myEntity);
+	}
+	
+}
+
+void Enemy::ScaleDown(float deltaTime)
+{
+	Vector2f tempScale = myTransform.GetScale() - Vector2f(deltaTime, deltaTime) * 1;
+	myTransform.SetScale(tempScale);
+
+	GetKill();
 }
 
 void Enemy::WaypointsCalculation()
@@ -126,5 +134,12 @@ void Enemy::GoToNextWaypoint(float deltaTime)
 
 void Enemy::Update(float deltaTime)
 {
-	GoToNextWaypoint(deltaTime);
+	if (isDying)
+	{
+		ScaleDown(deltaTime);
+	}
+	else
+	{
+		GoToNextWaypoint(deltaTime);
+	}
 }

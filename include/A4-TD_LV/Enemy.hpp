@@ -2,7 +2,7 @@
 
 #include <A4Engine/Vector2.hpp>
 #include <A4Engine/Transform.hpp>
-
+#include <entt/entt.hpp>
 
 class Enemy
 {
@@ -13,12 +13,14 @@ class Enemy
 		int currentWaypoint;
 		float moveSpeed;
 		Vector2f direction;
+		bool isDying;
+		entt::entity myEntity;
 
-
-		Enemy();
-		Enemy(Vector2f pos);
+		Enemy(Vector2f pos, entt::entity entity);
 		~Enemy();
 
+		void GetKill();
+		void ScaleDown(float deltaTime);
 		void WaypointsCalculation();
 		void GoToNextWaypoint(float deltaTime);
 		void Update(float deltaTime);

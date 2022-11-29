@@ -13,12 +13,14 @@ class LavaTrap
 		Vector2f myPosition;
 		bool enemyDetected;
 		bool isActive;
-		float cooldown;
+		bool trapCoolDown;
+		float coolDownRemaining;
+		float baseCooldown;
 
 		LavaTrap(entt::entity gameObject);
 		~LavaTrap();
 
-		void Update();
-		void Activation();
-		void Reloading();
+		void Update(float deltaTime);
+		void Activation(float deltaTime);
+		void Reloading(float deltaTime);
 };

@@ -36,7 +36,6 @@
 
 entt::entity CreateCamera(entt::registry& registry);
 entt::entity CreateBackground(entt::registry& registry);
-entt::entity CreateEnemy(entt::registry& registry);
 entt::entity CreateTrap(entt::registry& registry, Vector2f pos);
 
 
@@ -209,17 +208,6 @@ entt::entity CreateBackground(entt::registry& registry)
 	entt::entity entity = registry.create();
 	registry.emplace<GraphicsComponent>(entity, std::move(background));
 	auto& transform = registry.emplace<Transform>(entity);
-
-	return entity;
-}
-
-entt::entity CreateEnemy(entt::registry& registry)
-{
-	std::shared_ptr<Sprite> enemySprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Enemy.png"));
-	entt::entity entity = registry.create();
-	registry.emplace<GraphicsComponent>(entity, std::move(enemySprite));
-	registry.emplace<Transform>(entity);
-	registry.emplace<Enemy>(entity);
 
 	return entity;
 }
