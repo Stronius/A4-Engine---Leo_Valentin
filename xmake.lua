@@ -45,6 +45,7 @@ target("A4-TD_LV")
     set_kind("binary")
     add_deps("A4Engine")
     add_headerfiles("include/A4-TD_LV/*.h", "include/A4-TD_LV/*.hpp")
+    add_includedirs("include")
     add_files("src/A4-TD_LV/**.cpp")
     add_packages("openal-soft", "dr_wav")
 

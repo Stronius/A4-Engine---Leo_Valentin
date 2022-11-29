@@ -23,9 +23,10 @@
 #include <A4Engine/Transform.hpp>
 #include <A4Engine/VelocityComponent.hpp>
 #include <A4Engine/VelocitySystem.hpp>
-#include <A4Engine/Enemy.hpp>
-#include <A4Engine/GameManager.hpp>
-#include <A4Engine/LavaTrap.hpp>
+#include <A4-TD_LV/Enemy.hpp>
+#include <A4-TD_LV/GameManager.hpp>
+#include <A4-TD_LV/LavaTrap.hpp>
+#include <A4-TD_LV/TrapManager.hpp>
 #include <chipmunk/chipmunk.h>
 #include <entt/entt.hpp>
 #include <fmt/core.h>
@@ -57,36 +58,33 @@ int main()
 
 	ImGui::SetCurrentContext(imgui.GetContext());
 
-	// ZQSD
-	InputManager::Instance().BindKeyPressed(SDLK_q, "MoveLeft");
-	InputManager::Instance().BindKeyPressed(SDLK_d, "MoveRight");
-	InputManager::Instance().BindKeyPressed(SDLK_z, "MoveUp");
-	InputManager::Instance().BindKeyPressed(SDLK_s, "MoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_8, "Move8");
-
 	// Touches directionnelles (caméra)
 	InputManager::Instance().BindKeyPressed(SDLK_LEFT, "CameraMoveLeft");
 	InputManager::Instance().BindKeyPressed(SDLK_RIGHT, "CameraMoveRight");
-	InputManager::Instance().BindKeyPressed(SDLK_UP, "CameraMoveUp");
-	InputManager::Instance().BindKeyPressed(SDLK_DOWN, "CameraMoveDown");
+
 
 	//Pose de pièges
-	InputManager::Instance().BindKeyPressed(SDLK_0, "CameraMoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_1, "CameraMoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_2, "CameraMoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_3, "CameraMoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_4, "CameraMoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_5, "CameraMoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_6, "CameraMoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_7, "CameraMoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_8, "CameraMoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_9, "CameraMoveDown");
+	InputManager::Instance().BindKeyPressed(SDLK_1, "Column1");
+	InputManager::Instance().BindKeyPressed(SDLK_2, "Column2");
+	InputManager::Instance().BindKeyPressed(SDLK_3, "Column3");
+	InputManager::Instance().BindKeyPressed(SDLK_4, "Column4");
+	InputManager::Instance().BindKeyPressed(SDLK_5, "Column5");
+	InputManager::Instance().BindKeyPressed(SDLK_6, "Column6");
+	InputManager::Instance().BindKeyPressed(SDLK_7, "Column7");
+	InputManager::Instance().BindKeyPressed(SDLK_8, "Column8");
+	InputManager::Instance().BindKeyPressed(SDLK_9, "Column9");
+	InputManager::Instance().BindKeyPressed(SDLK_0, "Column10");
+	InputManager::Instance().BindKeyPressed(SDLK_a, "Row1");
+	InputManager::Instance().BindKeyPressed(SDLK_z, "Row2");
+	InputManager::Instance().BindKeyPressed(SDLK_e, "Row3");
+	InputManager::Instance().BindKeyPressed(SDLK_r, "Row4");
+	InputManager::Instance().BindKeyPressed(SDLK_t, "Row5");
 
-	InputManager::Instance().BindKeyPressed(SDLK_a, "CameraMoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_z, "CameraMoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_e, "CameraMoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_r, "CameraMoveDown");
-	InputManager::Instance().BindKeyPressed(SDLK_t, "CameraMoveDown");
+
+	//Valider
+	InputManager::Instance().BindKeyPressed(SDLK_KP_ENTER, "EndSetup");
+
+
 
 	std::shared_ptr<Spritesheet> spriteSheet = std::make_shared<Spritesheet>();
 	spriteSheet->AddAnimation("idle", 5, 0.1f, Vector2i{ 0, 0 },  Vector2i{ 32, 32 });
@@ -95,13 +93,14 @@ int main()
 
 	entt::registry registry;
 
-	GameManager gameManager(registry);
 	AnimationSystem animSystem(registry);
 	RenderSystem renderSystem(renderer, registry);
 	VelocitySystem velocitySystem(registry);
 	PhysicsSystem physicsSystem(registry);
 	physicsSystem.SetGravity({ 0.f, 981.f });
 	physicsSystem.SetDamping(0.9f);
+	GameManager gameManager(registry);
+	TrapManager trapManager;
 
 	entt::entity cameraEntity = CreateCamera(registry);
 
@@ -111,8 +110,6 @@ int main()
 	//entt::entity trapdoor = CreateTrap(registry, { 512, 512 });
 
 	entt::entity background = CreateBackground(registry);
-	
-	InputManager::Instance().BindKeyPressed(SDLK_SPACE, "Jump");
 
 	Uint64 lastUpdate = SDL_GetPerformanceCounter();
 
@@ -140,16 +137,8 @@ int main()
 		renderer.Clear();
 
 		HandleCameraMovement(registry, cameraEntity, deltaTime);
-		//HandleRunnerMovement(registry, runner, deltaTime);
 
-		
-		if (InputManager::Instance().IsPressed("Jump"))
-			std::cout << "Pressed" << std::endl;
-		if (InputManager::Instance().IsReleased("Jump"))
-			std::cout << "Released" << std::endl;
-
-
-
+		trapManager.Update(deltaTime);
 		gameManager.Update(deltaTime);
 
 

@@ -1,13 +1,12 @@
 #pragma once
 
-#include <A4Engine/Export.hpp>
 #include <A4Engine/Vector2.hpp>
-#include <A4Engine/Enemy.hpp>
+#include <A4-TD_LV/Enemy.hpp>
 #include <entt/entt.hpp>
 
 
 
-class A4ENGINE_API GameManager
+class GameManager
 {
 	public:
 

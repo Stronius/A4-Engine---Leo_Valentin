@@ -1,14 +1,14 @@
 #pragma once
 
-#include <A4Engine/Export.hpp>
+#include <entt/entt.hpp>
 #include <A4Engine/Vector2.hpp>
 #include <A4Engine/Transform.hpp>
+#include <A4Engine/SpritesheetComponent.hpp>
 
 
-class A4ENGINE_API LavaTrap
+class LavaTrap
 {
 	public:
-
 		Vector2f myPosition;
 		bool enemyDetected;
 		bool isActive;

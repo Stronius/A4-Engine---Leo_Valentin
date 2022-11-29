@@ -1,11 +1,11 @@
 #include <iostream>
-#include <A4Engine/GameManager.hpp>
+#include <A4-TD_LV/GameManager.hpp>
 #include <A4Engine/ResourceManager.hpp>
 #include <A4Engine/Sprite.hpp>
 #include <A4Engine/GraphicsComponent.hpp>
 #include <A4Engine/SpriteSheet.hpp>
 #include <A4Engine/SpriteSheetComponent.hpp>
-#include <A4Engine/Lavatrap.hpp>
+#include <A4-TD_LV/Lavatrap.hpp>
 
 
 
@@ -117,13 +117,13 @@ void GameManager::CreateTrap(Vector2f pos)
 	spritesheet->AddAnimation("open", 5, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
 	spritesheet->AddAnimation("close", 5, 100, Vector2i{ 0, 128 }, Vector2i{ 128, 128 });
 
-	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Trapdoor_Open.png"),1);
+	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Trapdoor_Anim.png"),1);
 	sprite->SetOrigin({ 0.5f, 0.5f });
 	sprite->Resize(128, 128);
 	sprite->SetRect(SDL_Rect{ 0, 0, 128, 128 });
 
 	entt::entity entity = my_registry.create();
-	my_registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
+	auto& spritesheetComponent = my_registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
 	my_registry.emplace<GraphicsComponent>(entity, std::move(sprite));
 	auto& transform = my_registry.emplace<Transform>(entity);
 	auto& trapScript = my_registry.emplace<LavaTrap>(entity);
