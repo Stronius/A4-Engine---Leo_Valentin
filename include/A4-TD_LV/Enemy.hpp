@@ -15,8 +15,9 @@ class Enemy
 		Vector2f direction;
 		bool isDying;
 		entt::entity myEntity;
+		int myNum;
 
-		Enemy(Vector2f pos, entt::entity entity);
+		Enemy(Vector2f pos, entt::entity entity, int num);
 		~Enemy();
 
 		void GetKill();

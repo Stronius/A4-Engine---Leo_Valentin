@@ -15,10 +15,12 @@ my_registry(registry)
 
 	my_instance = this;
 	isPause = false;
-	referenceTimerSpawn = 3.f;
-	timerSpawn = 3;
+	referenceTimerSpawn = 2.f;
+	timerSpawn = 1;
 	enemyList = std::vector<Enemy>();
-	deleteMeBool = true;
+	nbSpawnEnemyToSpawn = 10;
+	numEnemy = 0;
+	gameLose = false;
 
 	CreateTrap({ 576,576 });
 	CreateTrap({ 576+128,576+128 });
@@ -28,11 +30,12 @@ my_registry(registry)
 	CreateTrap({ 576+256,576 - 256 });
 	CreateTrap({ 576+128,576 - 256 });
 	CreateTrap({ 576+256,576-256 });
-	CreateEnemy({ 576-128,576 });
-	CreateEnemy({ 192.f,128 * 2 + 64 });
-	CreateEnemy({ 192.f,128 * 3 + 64 });
-	CreateEnemy({ 192.f,128 * 4 + 64 });
-	CreateEnemy({ 192.f,128 * 5 + 64 });
+	//CreateEnemy({ 576-128,576 });
+	//CreateEnemy({ 192.f,128 * 2 + 64 });
+	//CreateEnemy({ 192.f,128 * 3 + 64 });
+	//CreateEnemy({ 192.f,128 * 4 + 64 });
+	//CreateEnemy({ 192.f,128 * 5 + 64 });
+
 }
 
 GameManager::~GameManager()
@@ -47,12 +50,14 @@ void GameManager::Pause()
 
 void GameManager::Victory()
 {
-
+	isPause = true;
+	//Afficher le sprite de win
 }
 
 void GameManager::Lose()
 {
-
+	isPause = true;
+	//Afficher le sprite de lose
 }
 
 void GameManager::EnemiesMovement(float deltaTime)
@@ -73,23 +78,8 @@ void GameManager::TrapDetection(float deltaTime)
 	for (entt::entity entity : view)
 	{
 		LavaTrap& LavaScript = view.get<LavaTrap>(entity);
-		//Transform& LavaTransform = view.get<Transform>(entity);
 		LavaScript.Update(deltaTime);
-		//LavaTransform = LavaScript.myTransform;
 	}
-}
-
-void GameManager::CheckEnemyTraped(Vector2f trapPosition)
-{
-	auto it = enemyList.begin();
-	if (it != enemyList.end())
-	{
-		if (abs(trapPosition.x - it->myTransform.GetPosition().x) <= 128 && abs(trapPosition.y - it->myTransform.GetPosition().y) <= 128)
-		{
-			std::cout << "enemy truc" << std::endl;
-		}
-	}
-
 }
 
 void GameManager::CheckForSpawn(float deltaTime)
@@ -100,10 +90,13 @@ void GameManager::CheckForSpawn(float deltaTime)
 	}
 	else
 	{
-		if (deleteMeBool)
+		if (nbSpawnEnemyToSpawn > 0)
 		{
-			deleteMeBool = false;
-			//CreateEnemy({ 192.f,128 * 1 + 64 });
+			int whereToSpawn = rand() % 5;
+			//std::cout << whereToSpawn + 1 << std::endl;
+
+			nbSpawnEnemyToSpawn--;
+			CreateEnemy({ 192.f ,128.f * (whereToSpawn + 1) + 64 }); //+1 pour pas qu'il pop en 0 car le rand commence à 0
 		}
 		timerSpawn = referenceTimerSpawn;
 	}
@@ -112,12 +105,13 @@ void GameManager::CheckForSpawn(float deltaTime)
 
 void GameManager::CreateEnemy(Vector2f pos)
 {
+	numEnemy++;
 	std::shared_ptr<Sprite> enemySprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Enemy.png"),2);
 	entt::entity entity = my_registry.create();
 	enemySprite->SetOrigin({ 0.5f, 0.5f });
 	my_registry.emplace<GraphicsComponent>(entity, std::move(enemySprite));
 	my_registry.emplace<Transform>(entity);
-	Enemy& enemyScript = my_registry.emplace<Enemy>(entity, pos, entity);
+	Enemy& enemyScript = my_registry.emplace<Enemy>(entity, pos, entity, numEnemy);
 
 	enemyList.push_back(enemyScript);
 }

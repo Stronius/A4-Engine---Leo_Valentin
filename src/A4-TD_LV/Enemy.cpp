@@ -4,7 +4,7 @@
 #include <iostream>
 #include <A4-TD_LV/GameManager.hpp>
 
-Enemy::Enemy(Vector2f pos, entt::entity entity)
+Enemy::Enemy(Vector2f pos, entt::entity entity, int num)
 {
 	myTransform = Transform();
 	myTransform.SetPosition(pos);
@@ -14,6 +14,7 @@ Enemy::Enemy(Vector2f pos, entt::entity entity)
 	moveSpeed = 1.f;
 	isDying = false;
 	myEntity = entity;
+	myNum = num;
 
 	WaypointsCalculation();
 	direction = (waypoints[currentWaypoint] - myTransform.GetPosition()) * 0.014;
@@ -31,10 +32,9 @@ void Enemy::GetKill()
 	{
 		myTransform.SetPosition(Vector2f(0, 0));
 		myTransform.SetScale(Vector2f(1, 1));
-		GameManager::Instance().my_registry.remove<Enemy>(myEntity);
 		GameManager::Instance().my_registry.destroy(myEntity);
+		//GameManager::Instance().my_registry.remove<Enemy>(myEntity); // Fait tuer le mauvais enemy 
 	}
-	
 }
 
 void Enemy::ScaleDown(float deltaTime)
@@ -101,7 +101,7 @@ void Enemy::WaypointsCalculation()
 
 
 
-		if (tempWaypoint.x > 1600)
+		if (tempWaypoint.x >= 1600)
 		{
 			keepOnSearching = false;
 		}
@@ -128,6 +128,12 @@ void Enemy::GoToNextWaypoint(float deltaTime)
 	}
 	else
 	{
+		if (currentWaypoint >= waypoints.size() && !GameManager::Instance().gameLose)
+		{
+			GameManager::Instance().gameLose = true;
+			std::cout << "Lose" << std::endl;
+			GameManager::Instance().Lose();
+		}
 		myTransform.Translate(direction);
 	}
 }

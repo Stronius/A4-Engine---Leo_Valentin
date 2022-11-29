@@ -48,7 +48,8 @@ void LavaTrap::Activation(float deltaTime)
 			//spritesheetComponent.PlayAnimation("Open");
 
 			GameManager::Instance().my_registry.get<SpritesheetComponent>(gameObject).PlayAnimation("Open");
-			std::cout << "enemy Detected" << std::endl;
+			//std::cout << "enemy Detected" << std::endl;
+
 			enemy.isDying = true;
 			trapCoolDown = true;
 		}
