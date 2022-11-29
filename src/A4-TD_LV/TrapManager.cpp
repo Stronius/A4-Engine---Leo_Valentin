@@ -164,7 +164,26 @@ void TrapManager::InputDetection()
 	}
 	else if (pos.x > 0 && pos.y == 0 && InputManager::Instance().IsPressed("EndSetup"))
 	{
-		CreateTrapdoor(GameManager::Instance().my_registry, { pos.x, 704 });
+		Vector2f position;
+		bool foundATrap = false;
+
+		for each (entt::entity entity in trapdoors)
+		{
+			position = GameManager::Instance().my_registry.get<Transform>(entity).GetPosition();
+
+			if (position.x == pos.x + 5 && position.y == 449)
+			{
+				auto e = std::find(trapdoors.begin(), trapdoors.end(), entity);
+				trapdoors.erase(e);
+
+				GameManager::Instance().my_registry.destroy(entity);
+				foundATrap = true;
+				break;
+			}
+		}
+
+		if (!foundATrap)
+		CreateArrowWall(GameManager::Instance().my_registry, { pos.x+5, 449 });
 	}
 }
 
@@ -187,7 +206,26 @@ void TrapManager::CreateTrapdoor(entt::registry& registry, Vector2f pos)
 	transform.SetPosition(pos);
 
 	trapdoors.push_back(entity);
+}
 
+void TrapManager::CreateArrowWall(entt::registry& registry, Vector2f pos)
+{
+	std::shared_ptr<Spritesheet> spritesheet = std::make_shared<Spritesheet>();
+	spritesheet->AddAnimation("Idle", 1, 100, Vector2i{ 0, 0 }, Vector2i{ 138, 658 });
+	spritesheet->AddAnimation("Shoot", 5, 100, Vector2i{ 0, 0 }, Vector2i{ 138, 658 });
+
+	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/ArrowWall.png"), 2);
+	sprite->SetOrigin({ 0.5f, 0.5f });
+	sprite->Resize(138, 658);
+	sprite->SetRect(SDL_Rect{ 0, 0, 138, 658 });
+
+	entt::entity entity = registry.create();
+	registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
+	registry.emplace<GraphicsComponent>(entity, std::move(sprite));
+	auto& transform = registry.emplace<Transform>(entity);
+	transform.SetPosition(pos);
+
+	trapdoors.push_back(entity);
 }
 
 void TrapManager::CreateSelectedIcon(entt::registry& registry, Vector2f pos) 

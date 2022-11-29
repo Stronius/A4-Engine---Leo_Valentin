@@ -16,6 +16,7 @@ class TrapManager
 		void AttackPhase(float deltaTime);
 		void InputDetection();
 		void CreateTrapdoor(entt::registry& registry, Vector2f pos);
+		void CreateArrowWall(entt::registry& registry, Vector2f pos);
 		void CreateSelectedIcon(entt::registry& registry, Vector2f pos);
 
 		enum phases {Setup, Attack};
