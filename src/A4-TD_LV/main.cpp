@@ -36,7 +36,6 @@
 
 entt::entity CreateCamera(entt::registry& registry);
 entt::entity CreateBackground(entt::registry& registry);
-entt::entity CreateTrap(entt::registry& registry, Vector2f pos);
 
 
 void EntityInspector(const char* windowName, entt::registry& registry, entt::entity entity);
@@ -58,37 +57,8 @@ int main()
 	ImGui::SetCurrentContext(imgui.GetContext());
 
 	// Touches directionnelles (caméra)
-	InputManager::Instance().BindKeyPressed(SDLK_LEFT, "CameraMoveLeft");
-	InputManager::Instance().BindKeyPressed(SDLK_RIGHT, "CameraMoveRight");
-
-
-	//Pose de pièges
-	InputManager::Instance().BindKeyPressed(SDLK_1, "Column1");
-	InputManager::Instance().BindKeyPressed(SDLK_2, "Column2");
-	InputManager::Instance().BindKeyPressed(SDLK_3, "Column3");
-	InputManager::Instance().BindKeyPressed(SDLK_4, "Column4");
-	InputManager::Instance().BindKeyPressed(SDLK_5, "Column5");
-	InputManager::Instance().BindKeyPressed(SDLK_6, "Column6");
-	InputManager::Instance().BindKeyPressed(SDLK_7, "Column7");
-	InputManager::Instance().BindKeyPressed(SDLK_8, "Column8");
-	InputManager::Instance().BindKeyPressed(SDLK_9, "Column9");
-	InputManager::Instance().BindKeyPressed(SDLK_0, "Column10");
-	InputManager::Instance().BindKeyPressed(SDLK_a, "Row1");
-	InputManager::Instance().BindKeyPressed(SDLK_z, "Row2");
-	InputManager::Instance().BindKeyPressed(SDLK_e, "Row3");
-	InputManager::Instance().BindKeyPressed(SDLK_r, "Row4");
-	InputManager::Instance().BindKeyPressed(SDLK_t, "Row5");
-
-
-	//Valider
-	InputManager::Instance().BindKeyPressed(SDLK_KP_ENTER, "EndSetup");
-
-
-
-	std::shared_ptr<Spritesheet> spriteSheet = std::make_shared<Spritesheet>();
-	spriteSheet->AddAnimation("idle", 5, 0.1f, Vector2i{ 0, 0 },  Vector2i{ 32, 32 });
-	spriteSheet->AddAnimation("run",  8, 0.1f, Vector2i{ 0, 32 }, Vector2i{ 32, 32 });
-	spriteSheet->AddAnimation("jump", 4, 0.1f, Vector2i{ 0, 64 }, Vector2i{ 32, 32 });
+	InputManager::Instance().BindKeyPressed(SDLK_q, "CameraMoveLeft");
+	InputManager::Instance().BindKeyPressed(SDLK_d, "CameraMoveRight");
 
 	entt::registry registry;
 
@@ -102,12 +72,6 @@ int main()
 	TrapManager trapManager;
 
 	entt::entity cameraEntity = CreateCamera(registry);
-
-	/*entt::entity enemy1 = CreateEnemy(registry);
-	registry.get<Enemy>(enemy1).myTransform.SetPosition({ 128.f, 128.f });*/
-
-	//entt::entity trapdoor = CreateTrap(registry, { 512, 512 });
-
 	entt::entity background = CreateBackground(registry);
 
 	Uint64 lastUpdate = SDL_GetPerformanceCounter();
@@ -212,28 +176,6 @@ entt::entity CreateBackground(entt::registry& registry)
 	return entity;
 }
 
-entt::entity CreateTrap(entt::registry& registry, Vector2f pos)
-{
-	std::shared_ptr<Spritesheet> spritesheet = std::make_shared<Spritesheet>();
-	spritesheet->AddAnimation("idle", 1, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
-	spritesheet->AddAnimation("open", 5, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
-	spritesheet->AddAnimation("close", 5, 100, Vector2i{ 0, 128 }, Vector2i{ 128, 128 });
-
-	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Trapdoor_Open.png"),1);
-	sprite->SetOrigin({ 0.f, 0.f });
-	sprite->Resize(128, 128);
-	sprite->SetRect(SDL_Rect{ 0, 0, 128, 128 });
-
-	entt::entity entity = registry.create();
-	registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
-	registry.emplace<GraphicsComponent>(entity, std::move(sprite));
-	auto& transform = registry.emplace<Transform>(entity);
-	registry.emplace<LavaTrap>(entity, entity);
-	transform.SetPosition(pos);
-
-	return entity;
-}
-
 void HandleCameraMovement(entt::registry& registry, entt::entity camera, float deltaTime)
 {
 	Transform& cameraTransform = registry.get<Transform>(camera);
@@ -243,4 +185,9 @@ void HandleCameraMovement(entt::registry& registry, entt::entity camera, float d
 
 	if (InputManager::Instance().IsActive("CameraMoveRight"))
 		cameraTransform.Translate(Vector2f(500.f * deltaTime, 0.f));
+
+	if (cameraTransform.GetPosition().x < 0)
+		cameraTransform.SetPosition({ 0, cameraTransform.GetPosition().y });
+	else if (cameraTransform.GetPosition().x > 187)
+		cameraTransform.SetPosition({ 187, cameraTransform.GetPosition().y });
 }
