@@ -9,7 +9,7 @@ class Enemy
 	public:
 		Transform myTransform;
 		Vector2f myPosition;
-		float myRotation;
+		bool moveForward;
 		int currentWaypoint;
 		float moveSpeed;
 		Vector2f direction;

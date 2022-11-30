@@ -97,7 +97,7 @@ void GameManager::CheckForSpawn(float deltaTime)
 			//std::cout << whereToSpawn + 1 << std::endl;
 
 			nbSpawnEnemyToSpawn--;
-			CreateEnemy({ 192.f ,128.f * (whereToSpawn + 1) + 64 }); //+1 pour pas qu'il pop en 0 car le rand commence à 0
+			CreateEnemy({ 64 ,128.f * (whereToSpawn + 1) + 64 }); //+1 pour pas qu'il pop en 0 car le rand commence à 0
 		}
 		timerSpawn = referenceTimerSpawn;
 	}

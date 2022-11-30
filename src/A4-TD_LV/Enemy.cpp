@@ -9,7 +9,7 @@ Enemy::Enemy(Vector2f pos, entt::entity entity, int num)
 	myTransform = Transform();
 	myTransform.SetPosition(pos);
 	myPosition = Vector2f(0, 0);
-	myRotation = 0;
+	moveForward = true;
 	currentWaypoint = 0;
 	moveSpeed = 1.f;
 	isDying = false;
@@ -55,16 +55,16 @@ void Enemy::WaypointsCalculation()
 	bool keepOnSearching = true;
 	while (keepOnSearching)
 	{
-		int forwardOrNot = rand() % 100;
-
-		if (forwardOrNot >= 50)
+		if (moveForward)
 		{
+			moveForward = false;
 			tempX += 128;
 		}
-		else if (forwardOrNot < 50)
+		else if (!moveForward)
 		{
 			int upOrDown = rand() % 100;
 
+			moveForward = true;
 			bool goUp = false;
 
 			if (upOrDown >= 50)
@@ -94,6 +94,48 @@ void Enemy::WaypointsCalculation()
 				tempY += 128;
 			}
 		}
+	//while (keepOnSearching)
+	//{
+	//	int forwardOrNot = rand() % 100;
+
+
+	//	if (forwardOrNot >= 50)
+	//	{
+	//		tempX += 128;
+	//	}
+	//	else if (forwardOrNot < 50)
+	//	{
+	//		int upOrDown = rand() % 100;
+
+	//		bool goUp = false;
+
+	//		if (upOrDown >= 50)
+	//		{
+	//			goUp = true;
+	//		}
+	//		else
+	//		{
+	//			goUp = false;
+	//		}
+
+	//		if (tempY == 192) //clamp haut
+	//		{
+	//			goUp = false;
+	//		}
+	//		else if (tempY == (128 * 5) + 64) //clamp bas
+	//		{
+	//			goUp = true;
+	//		}
+
+	//		if (goUp)
+	//		{
+	//			tempY -= 128;
+	//		}
+	//		else
+	//		{
+	//			tempY += 128;
+	//		}
+	//	}
 
 		Vector2f tempWaypoint(tempX, tempY);
 
