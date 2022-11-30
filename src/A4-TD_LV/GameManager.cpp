@@ -37,6 +37,15 @@ my_registry(registry)
 	//CreateEnemy({ 192.f,128 * 4 + 64 });
 	//CreateEnemy({ 192.f,128 * 5 + 64 });
 
+	std::shared_ptr<Sprite> tempPauseSprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Pause.png"), -1);
+	tempPauseSprite->SetOrigin({ 0.5f, 0.5f });
+	tempPauseSprite->SetRect(SDL_Rect{ 0, 0, 512, 512 });
+	pauseEntity = GameManager::Instance().my_registry.create();
+	GameManager::Instance().my_registry.emplace<GraphicsComponent>(pauseEntity, std::move(tempPauseSprite));
+	auto& transformDisplayLavaTrapNumberIndicator = GameManager::Instance().my_registry.emplace<Transform>(pauseEntity);
+
+	transformDisplayLavaTrapNumberIndicator.SetPosition({800, 450});
+
 }
 
 GameManager::~GameManager()
@@ -47,6 +56,22 @@ GameManager::~GameManager()
 void GameManager::Pause()
 {
 	isPause = !isPause;
+	if (isPause)
+	{
+		std::shared_ptr<Sprite> tempPauseSprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Pause.png"), 2);
+		my_registry.get<GraphicsComponent>(pauseEntity).renderable = tempPauseSprite;
+		tempPauseSprite->SetOrigin({ 0.5f, 0.5f });
+		tempPauseSprite->SetRect(SDL_Rect{ 0, 0, 512, 512 });
+		my_registry.get<Transform>(pauseEntity).SetPosition({ 800, 450 });
+	}
+	else
+	{
+		std::shared_ptr<Sprite> tempPauseSprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Pause.png"), -1);
+		my_registry.get<GraphicsComponent>(pauseEntity).renderable = tempPauseSprite;
+		tempPauseSprite->SetOrigin({ 0.5f, 0.5f });
+		tempPauseSprite->SetRect(SDL_Rect{ 0, 0, 512, 512 });
+		my_registry.get<Transform>(pauseEntity).SetPosition({ 800, 450 });
+	}
 }
 
 void GameManager::Victory()

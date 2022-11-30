@@ -20,6 +20,7 @@ class GameManager
 		int numEnemy;
 		bool gameLose;
 		bool phaseAttack;
+		entt::entity pauseEntity;
 
 		GameManager(entt::registry& registry);
 		GameManager(const GameManager&) = delete;

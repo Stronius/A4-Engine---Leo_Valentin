@@ -54,7 +54,7 @@ TrapManager::TrapManager()
 
 
 	nbrLavaTrapLeft = 12;
-	nbrArrowWallLeft = 15;
+	nbrArrowWallLeft = 3;
 
 	for (int i = 0; i < 16; i++)
 	{
