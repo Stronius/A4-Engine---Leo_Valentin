@@ -24,6 +24,7 @@ class TrapManager
 		void CreateArrowWall(entt::registry& registry, Vector2f pos);
 		void CreateSelectedIcon(entt::registry& registry, Vector2f pos);
 
+		void ClearConfiguration();
 		void SaveConfiguration();
 		void LoadConfiguration();
 

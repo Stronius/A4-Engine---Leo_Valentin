@@ -132,6 +132,8 @@ void TrapManager::SetupPhase(float deltaTime)
 		SaveConfiguration();
 	else if (InputManager::Instance().IsActive("Conf") && InputManager::Instance().IsPressed("Load"))
 		LoadConfiguration();
+	else if (InputManager::Instance().IsActive("Conf") && InputManager::Instance().IsPressed("Row4"))
+		ClearConfiguration();
 }
 
 void TrapManager::AttackPhase(float deltaTime)
@@ -379,6 +381,24 @@ void TrapManager::CreateSelectedIcon(entt::registry& registry, Vector2f pos)
 	auto& transform = registry.emplace<Transform>(entity);
 	selectedIcon.push_back(graphic);
 	transform.SetPosition(pos);
+}
+
+void TrapManager::ClearConfiguration()
+{
+	for (int i = trapdoors.size() - 1; i >= 0; i--)
+	{
+		auto e = std::find(trapdoors.begin(), trapdoors.end(), trapdoors[i]);
+		trapdoors.erase(e);
+
+		GameManager::Instance().my_registry.destroy(trapdoors[i]);
+	}
+
+	nbrArrowWallLeft = 3;
+	nbrLavaTrapLeft = 12;
+
+	GameManager::Instance().my_registry.get<GraphicsComponent>(displayArrowWallTrapNumber).renderable = spriteNumberList[nbrArrowWallLeft];
+	GameManager::Instance().my_registry.get<GraphicsComponent>(displayLavaTrapNumber).renderable = spriteNumberList[nbrLavaTrapLeft];
+
 }
 
 void TrapManager::SaveConfiguration()
