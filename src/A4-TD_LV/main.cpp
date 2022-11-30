@@ -59,6 +59,8 @@ int main()
 	// Touches directionnelles (caméra)
 	InputManager::Instance().BindKeyPressed(SDLK_q, "CameraMoveLeft");
 	InputManager::Instance().BindKeyPressed(SDLK_d, "CameraMoveRight");
+	InputManager::Instance().BindKeyPressed(SDLK_LEFT, "CameraMoveLeftArrow");
+	InputManager::Instance().BindKeyPressed(SDLK_RIGHT, "CameraMoveRightArrow");
 
 	entt::registry registry;
 
@@ -180,10 +182,10 @@ void HandleCameraMovement(entt::registry& registry, entt::entity camera, float d
 {
 	Transform& cameraTransform = registry.get<Transform>(camera);
 
-	if (InputManager::Instance().IsActive("CameraMoveLeft"))
+	if (InputManager::Instance().IsActive("CameraMoveLeft") || InputManager::Instance().IsActive("CameraMoveLeftArrow"))
 		cameraTransform.Translate(Vector2f(-500.f * deltaTime, 0.f));
 
-	if (InputManager::Instance().IsActive("CameraMoveRight"))
+	if (InputManager::Instance().IsActive("CameraMoveRight") || InputManager::Instance().IsActive("CameraMoveRightArrow"))
 		cameraTransform.Translate(Vector2f(500.f * deltaTime, 0.f));
 
 	if (cameraTransform.GetPosition().x < 0)

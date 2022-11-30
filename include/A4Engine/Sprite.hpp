@@ -3,6 +3,7 @@
 #include <A4Engine/Export.hpp>
 #include <A4Engine/Renderable.hpp>
 #include <A4Engine/Vector2.hpp>
+#include <A4Engine/Color.hpp>
 #include <SDL.h>
 #include <memory>
 
@@ -31,12 +32,14 @@ class A4ENGINE_API Sprite : public Renderable // Une portion d'une texture
 
 		void SetOrigin(const Vector2f& origin);
 		void SetRect(SDL_Rect rect);
+		void SetColor(float r, float g, float b, float a);
 
 		Sprite& operator=(const Sprite&) = default;
 		Sprite& operator=(Sprite&&) = default;
 
 	private:
 		std::shared_ptr<const SDLppTexture> m_texture;
+		Color m_color;
 		SDL_Rect m_rect;
 		Vector2f m_origin;
 		int m_width;

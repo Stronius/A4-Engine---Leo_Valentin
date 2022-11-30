@@ -53,23 +53,25 @@ void Sprite::Draw(SDLppRenderer& renderer, const Matrix3f& matrix)
 	float invWidth = 1.f / texRect.w;
 	float invHeight = 1.f / texRect.h;
 
+	SDL_Color color = SDL_Color{ std::uint8_t(m_color.r * 255), std::uint8_t(m_color.g * 255), std::uint8_t(m_color.b * 255), std::uint8_t(m_color.a * 255) };
+
 	// On spécifie maintenant nos vertices (sommets), composés à chaque fois d'une couleur, position et de coordonnées de texture
 	// Ceux-ci vont servir à spécifier nos triangles. Chaque triangle est composé de trois sommets qui définissent les valeurs aux extrêmités,
 	// la carte graphique allant ensuite générer les valeurs intermédiaires (par interpolation) pour les pixels composant le triangle.
 	SDL_Vertex vertices[4];
-	vertices[0].color = SDL_Color{ 255, 255, 255, 255 };
+	vertices[0].color = color;
 	vertices[0].position = SDL_FPoint{ topLeftCorner.x, topLeftCorner.y };
 	vertices[0].tex_coord = SDL_FPoint{ m_rect.x * invWidth, m_rect.y * invHeight };
 
-	vertices[1].color = SDL_Color{ 255, 255, 255, 255 };
+	vertices[1].color = color;
 	vertices[1].position = SDL_FPoint{ topRightCorner.x, topRightCorner.y };
 	vertices[1].tex_coord = SDL_FPoint{ (m_rect.x + m_rect.w) * invWidth, m_rect.y * invHeight };
 
-	vertices[2].color = SDL_Color{ 255, 255, 255, 255 };
+	vertices[2].color = color;
 	vertices[2].position = SDL_FPoint{ bottomLeftCorner.x, bottomLeftCorner.y };
 	vertices[2].tex_coord = SDL_FPoint{ m_rect.x * invWidth, (m_rect.y + m_rect.h) * invHeight };
 
-	vertices[3].color = SDL_Color{ 255, 255, 255, 255 };
+	vertices[3].color = color;
 	vertices[3].position = SDL_FPoint{ bottomRightCorner.x, bottomRightCorner.y };
 	vertices[3].tex_coord = SDL_FPoint{ (m_rect.x + m_rect.w) * invWidth, (m_rect.y + m_rect.h) * invHeight };
 
@@ -118,4 +120,12 @@ void Sprite::SetOrigin(const Vector2f& origin)
 void Sprite::SetRect(SDL_Rect rect)
 {
 	m_rect = rect;
+}
+
+void Sprite::SetColor(float r, float g, float b, float a)
+{
+	m_color.r = r;
+	m_color.g = g;
+	m_color.b = b;
+	m_color.a = a;
 }
