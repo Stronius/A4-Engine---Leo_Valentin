@@ -19,6 +19,7 @@ class GameManager
 		int nbSpawnEnemyToSpawn;
 		int numEnemy;
 		bool gameLose;
+		bool phaseAttack;
 
 		GameManager(entt::registry& registry);
 		GameManager(const GameManager&) = delete;
@@ -29,11 +30,9 @@ class GameManager
 		void Victory();
 		void Lose();
 		void EnemiesMovement(float deltaTime);
-		void TrapDetection(float deltaTime);
 
 		void CheckForSpawn(float deltaTime);
 		void CreateEnemy(Vector2f pos);
-		void CreateTrap(Vector2f pos);
 
 		void Update(float deltaTime);
 

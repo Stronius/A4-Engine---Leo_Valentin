@@ -1,10 +1,12 @@
 #include <A4-TD_LV/TrapManager.hpp>
 #include <A4-TD_LV/GameManager.hpp>
+#include <A4-TD_LV/Trap.hpp>
 #include <A4Engine/InputManager.hpp>
 #include <A4Engine/ResourceManager.hpp>
 #include <A4Engine/SpritesheetComponent.hpp>
 #include <A4Engine/GraphicsComponent.hpp>
 #include <A4Engine/Transform.hpp>
+#include <A4Engine/Color.hpp>
 #include <A4Engine/Sprite.hpp>
 #include <iostream>
 
@@ -47,7 +49,8 @@ TrapManager::TrapManager()
 	InputManager::Instance().BindKeyPressed(SDLK_r, "Row4");		// y : 512	   +64		576
 	InputManager::Instance().BindKeyPressed(SDLK_t, "Row5");		// y : 640	   +64		704
 
-	InputManager::Instance().BindKeyPressed(SDLK_RETURN, "EndSetup");
+	InputManager::Instance().BindKeyPressed(SDLK_RETURN, "Validate");
+	InputManager::Instance().BindKeyPressed(SDLK_LSHIFT, "EndSetup1");
 
 
 	nbrLavaTrapLeft = 12;
@@ -94,6 +97,7 @@ void TrapManager::Update(float deltaTime)
 		}
 		case Attack: 
 		{
+			AttackPhase(deltaTime);
 			break;
 		}
 	}
@@ -101,7 +105,7 @@ void TrapManager::Update(float deltaTime)
 
 void TrapManager::SetupPhase(float deltaTime)
 {
-	/*if (InputManager::Instance().IsPressed("EndSetup")) 
+	if (InputManager::Instance().IsActive("EndSetup1") && InputManager::Instance().IsActive("Row4"))
 	{
 		for (int j = 0; j < selectedIcon.size(); j++)
 		{
@@ -109,13 +113,31 @@ void TrapManager::SetupPhase(float deltaTime)
 		}
 
 		currentPhase = Attack;
-	}*/
+		GameManager::Instance().phaseAttack = true;
+		return;
+	}
 
-	InputDetection();
-
+	InputDetectionPlace();
 }
 
-void TrapManager::InputDetection()
+void TrapManager::AttackPhase(float deltaTime)
+{
+	InputDetectionActivate();
+	TrapUpdate(deltaTime);
+}
+
+void TrapManager::TrapUpdate(float deltaTime) 
+{
+	auto view = GameManager::Instance().my_registry.view<Trap, Transform>();
+	for (entt::entity entity : view)
+	{
+		Trap& trap = view.get<Trap>(entity);
+
+		trap.Update(deltaTime);
+	}
+}
+
+void TrapManager::InputDetectionPlace()
 {
 	for (int i = 1; i < 11; i++)
 	{
@@ -168,7 +190,7 @@ void TrapManager::InputDetection()
 		}
 	}
 
-	if (pos.x > 0 && pos.y > 0 && InputManager::Instance().IsPressed("EndSetup"))
+	if (pos.x > 0 && pos.y > 0 && InputManager::Instance().IsPressed("Validate"))
 	{
 		Vector2f position;
 		bool foundATrap = false;
@@ -183,6 +205,8 @@ void TrapManager::InputDetection()
 				trapdoors.erase(e);
 
 				GameManager::Instance().my_registry.destroy(entity);
+				nbrLavaTrapLeft++;
+				GameManager::Instance().my_registry.get<GraphicsComponent>(displayLavaTrapNumber).renderable = spriteNumberList[nbrLavaTrapLeft];
 				foundATrap = true;
 				break;
 			}
@@ -191,7 +215,7 @@ void TrapManager::InputDetection()
 		if (!foundATrap && nbrLavaTrapLeft > 0)
 			CreateTrapdoor(GameManager::Instance().my_registry, pos);
 	}
-	else if (pos.x > 0 && pos.y == 0 && InputManager::Instance().IsPressed("EndSetup"))
+	else if (pos.x > 0 && pos.y == 0 && InputManager::Instance().IsPressed("Validate"))
 	{
 		Vector2f position;
 		bool foundATrap = false;
@@ -206,6 +230,8 @@ void TrapManager::InputDetection()
 				trapdoors.erase(e);
 
 				GameManager::Instance().my_registry.destroy(entity);
+				nbrArrowWallLeft++;
+				GameManager::Instance().my_registry.get<GraphicsComponent>(displayArrowWallTrapNumber).renderable = spriteNumberList[nbrArrowWallLeft];
 				foundATrap = true;
 				break;
 			}
@@ -216,12 +242,62 @@ void TrapManager::InputDetection()
 	}
 }
 
+void TrapManager::InputDetectionActivate()
+{
+	float x = 0, y = 0;
+
+	for (int i = 1; i < 11; i++)
+	{
+		if (InputManager::Instance().IsPressed("Column" + std::to_string(i)))
+		{
+			x = 128 * i + 192;
+		}
+	}
+
+	for (int i = 1; i < 6; i++)
+	{
+		if (InputManager::Instance().IsPressed("Row" + std::to_string(i)))
+		{
+			y = 128 * i + 64;
+		}
+	}
+
+	if (x != 0)
+	{
+		Vector2f position;
+
+		for each (entt::entity entity in trapdoors)
+		{
+			position = GameManager::Instance().my_registry.get<Transform>(entity).GetPosition();
+
+			if (abs(position.x - x) < 20)
+			{
+				GameManager::Instance().my_registry.get<Trap>(entity).Activation();
+			}
+		}
+	}
+	else if (y != 0)
+	{
+		Vector2f position;
+
+		for each (entt::entity entity in trapdoors)
+		{
+			position = GameManager::Instance().my_registry.get<Transform>(entity).GetPosition();
+
+			if (position.y == y)
+			{
+				GameManager::Instance().my_registry.get<Trap>(entity).Activation();
+			}
+		}
+	}
+}
+
 void TrapManager::CreateTrapdoor(entt::registry& registry, Vector2f pos)
 {
 	std::shared_ptr<Spritesheet> spritesheet = std::make_shared<Spritesheet>();
 	spritesheet->AddAnimation("Idle", 1, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
 	spritesheet->AddAnimation("Open", 5, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
-	spritesheet->AddAnimation("Close", 5, 100, Vector2i{ 0, 128 }, Vector2i{ 128, 128 });
+	spritesheet->AddAnimation("Reset", 5, 100, Vector2i{ 0, 128 }, Vector2i{ 128, 128 });
 
 	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Trapdoor_Anim.png"), 1);
 	sprite->SetOrigin({ 0.5f, 0.5f });
@@ -235,6 +311,8 @@ void TrapManager::CreateTrapdoor(entt::registry& registry, Vector2f pos)
 	registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
 	registry.emplace<GraphicsComponent>(entity, std::move(sprite));
 	auto& transform = registry.emplace<Transform>(entity);
+	auto& trap = registry.emplace<Trap>(entity, entity, Vector2f(64.f, 64.f), 4, 4);
+	trap.myPosition = pos;
 	transform.SetPosition(pos);
 
 	trapdoors.push_back(entity);
@@ -243,10 +321,11 @@ void TrapManager::CreateTrapdoor(entt::registry& registry, Vector2f pos)
 void TrapManager::CreateArrowWall(entt::registry& registry, Vector2f pos)
 {
 	std::shared_ptr<Spritesheet> spritesheet = std::make_shared<Spritesheet>();
-	spritesheet->AddAnimation("Idle", 1, 100, Vector2i{ 0, 0 }, Vector2i{ 138, 658 });
-	spritesheet->AddAnimation("Shoot", 5, 100, Vector2i{ 0, 0 }, Vector2i{ 138, 658 });
+	spritesheet->AddAnimation("Idle", 2, 100, Vector2i{ 0, 0 }, Vector2i{ 138, 658 });
+	spritesheet->AddAnimation("Open", 5, 100, Vector2i{ 138, 0 }, Vector2i{ 138, 658 });
+	spritesheet->AddAnimation("Reset", 2, 100, Vector2i{ 0, 0 }, Vector2i{ 138, 658 });
 
-	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/ArrowWall.png"), 2);
+	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/ArrowWallv2.png"), 2);
 	sprite->SetOrigin({ 0.5f, 0.5f });
 	sprite->Resize(138, 658);
 	sprite->SetRect(SDL_Rect{ 0, 0, 138, 658 });
@@ -259,6 +338,8 @@ void TrapManager::CreateArrowWall(entt::registry& registry, Vector2f pos)
 	registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
 	registry.emplace<GraphicsComponent>(entity, std::move(sprite));
 	auto& transform = registry.emplace<Transform>(entity);
+	auto& trap = registry.emplace<Trap>(entity, entity, Vector2f( 64, 900 ), 1, 5);
+	trap.myPosition = pos;
 	transform.SetPosition(pos);
 
 	trapdoors.push_back(entity);

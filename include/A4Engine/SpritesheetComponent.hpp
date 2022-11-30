@@ -20,6 +20,7 @@ class A4ENGINE_API SpritesheetComponent
 
 		void PlayAnimation(const std::string& animName);
 		void PlayAnimation(std::size_t animIndex);
+		void SetColor(float r, float g, float b, float a);
 
 	private:
 		void Update(float elapsedTime);

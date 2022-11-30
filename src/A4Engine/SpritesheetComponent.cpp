@@ -35,6 +35,11 @@ void SpritesheetComponent::PlayAnimation(std::size_t animIndex)
 	m_timeAccumulator = 0.f;
 }
 
+void SpritesheetComponent::SetColor(float r, float g, float b, float a) 
+{
+	m_targetSprite->SetColor(r, g, b, a);
+}
+
 void SpritesheetComponent::Update(float elapsedTime)
 {
 	if (m_currentAnimation >= m_spritesheet->GetAnimationCount())

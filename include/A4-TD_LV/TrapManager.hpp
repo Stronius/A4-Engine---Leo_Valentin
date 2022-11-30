@@ -15,7 +15,11 @@ class TrapManager
 		void Update(float deltaTime);
 		void SetupPhase(float deltaTime);
 		void AttackPhase(float deltaTime);
-		void InputDetection();
+		void TrapUpdate(float deltaTime);
+
+		void InputDetectionPlace();
+		void InputDetectionActivate();
+
 		void CreateTrapdoor(entt::registry& registry, Vector2f pos);
 		void CreateArrowWall(entt::registry& registry, Vector2f pos);
 		void CreateSelectedIcon(entt::registry& registry, Vector2f pos);
