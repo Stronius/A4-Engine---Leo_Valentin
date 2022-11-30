@@ -61,6 +61,7 @@ int main()
 	InputManager::Instance().BindKeyPressed(SDLK_d, "CameraMoveRight");
 	InputManager::Instance().BindKeyPressed(SDLK_LEFT, "CameraMoveLeftArrow");
 	InputManager::Instance().BindKeyPressed(SDLK_RIGHT, "CameraMoveRightArrow");
+	InputManager::Instance().BindKeyPressed(SDLK_ESCAPE, "Pausing");
 
 	entt::registry registry;
 
@@ -77,6 +78,25 @@ int main()
 	entt::entity background = CreateBackground(registry);
 
 	Uint64 lastUpdate = SDL_GetPerformanceCounter();
+
+	std::shared_ptr<Sprite> lavaTrapIndicator = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Trapdoor_Anim.png"),1);
+	lavaTrapIndicator->SetOrigin({ 0.5f, 0.5f });
+	lavaTrapIndicator->Resize(64, 64);
+	lavaTrapIndicator->SetRect(SDL_Rect{ 0, 0, 128, 128 });
+	entt::entity entityLavaTrapIndicator = registry.create();
+	registry.emplace<GraphicsComponent>(entityLavaTrapIndicator, std::move(lavaTrapIndicator));
+	auto& transformlavaTrapIndicator = registry.emplace<Transform>(entityLavaTrapIndicator);
+	transformlavaTrapIndicator.SetPosition({640,64});
+
+	std::shared_ptr<Sprite> ArrowWallTrapIndicator = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/ArrowWall.png"), 1);
+	ArrowWallTrapIndicator->SetOrigin({ 0.5f, 0.5f });
+	ArrowWallTrapIndicator->Resize(96, 96);
+	ArrowWallTrapIndicator->SetRect(SDL_Rect{ 0, 0, 128, 128 });
+	entt::entity entityArrowWallTrapIndicator = registry.create();
+	registry.emplace<GraphicsComponent>(entityArrowWallTrapIndicator, std::move(ArrowWallTrapIndicator));
+	auto& transformArrowWallTrapIndicator = registry.emplace<Transform>(entityArrowWallTrapIndicator);
+	transformArrowWallTrapIndicator.SetPosition({ 896,96});
+
 
 	bool isOpen = true;
 	while (isOpen)
@@ -103,9 +123,17 @@ int main()
 
 		HandleCameraMovement(registry, cameraEntity, deltaTime);
 
-		trapManager.Update(deltaTime);
-		gameManager.Update(deltaTime);
+		if (InputManager::Instance().IsReleased("Pausing"))
+		{
+			std::cout << "Pause" << std::endl;
+			GameManager::Instance().Pause();
+		}
 
+		if (!GameManager::Instance().isPause)
+		{
+			trapManager.Update(deltaTime);
+			gameManager.Update(deltaTime);
+		}
 
 		animSystem.Update(deltaTime);
 		velocitySystem.Update(deltaTime);

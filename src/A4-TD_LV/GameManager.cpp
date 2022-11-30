@@ -6,6 +6,7 @@
 #include <A4Engine/SpriteSheet.hpp>
 #include <A4Engine/SpriteSheetComponent.hpp>
 #include <A4-TD_LV/Lavatrap.hpp>
+#include <A4Engine/InputManager.hpp>
 
 GameManager::GameManager(entt::registry& registry) :
 my_registry(registry)

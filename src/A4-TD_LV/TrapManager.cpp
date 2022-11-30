@@ -48,6 +48,36 @@ TrapManager::TrapManager()
 	InputManager::Instance().BindKeyPressed(SDLK_t, "Row5");		// y : 640	   +64		704
 
 	InputManager::Instance().BindKeyPressed(SDLK_RETURN, "EndSetup");
+
+
+	nbrLavaTrapLeft = 12;
+	nbrArrowWallLeft = 4;
+
+	for (int i = 0; i < 16; i++)
+	{
+		spriteNumberList.push_back(std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Chiffre" + std::to_string(i) + ".png"), 1));
+	}
+
+	displayLavaTrapNumber = spriteNumberList[nbrLavaTrapLeft];
+	displayLavaTrapNumber = spriteNumberList[nbrLavaTrapLeft-5];
+	displayLavaTrapNumber->SetOrigin({ 0.5f, 0.5f });
+	displayLavaTrapNumber->Resize(64, 64);
+	displayLavaTrapNumber->SetRect(SDL_Rect{ 0, 0, 128, 128 });
+	entt::entity entityDisplayLavaTrapNumberIndicator = GameManager::Instance().my_registry.create();
+	GameManager::Instance().my_registry.emplace<GraphicsComponent>(entityDisplayLavaTrapNumberIndicator, std::move(displayLavaTrapNumber));
+	auto& transformDisplayLavaTrapNumberIndicator = GameManager::Instance().my_registry.emplace<Transform>(entityDisplayLavaTrapNumberIndicator);
+	transformDisplayLavaTrapNumberIndicator.SetPosition({ 640+64,64 });
+	
+	displayArrowWallTrapNumber = spriteNumberList[nbrArrowWallLeft];
+	displayArrowWallTrapNumber->SetOrigin({ 0.5f, 0.5f });
+	displayArrowWallTrapNumber->Resize(64, 64);
+	displayArrowWallTrapNumber->SetRect(SDL_Rect{ 0, 0, 128, 128 });
+	entt::entity entityDisplayArrowWallTrapNumberIndicator = GameManager::Instance().my_registry.create();
+	GameManager::Instance().my_registry.emplace<GraphicsComponent>(entityDisplayArrowWallTrapNumberIndicator, std::move(displayArrowWallTrapNumber));
+	auto& transformDisplayArrowWallTrapNumberIndicator = GameManager::Instance().my_registry.emplace<Transform>(entityDisplayArrowWallTrapNumberIndicator);
+	transformDisplayArrowWallTrapNumberIndicator.SetPosition({ 896+64,96 });
+
+
 }
 
 TrapManager::~TrapManager()
@@ -159,7 +189,7 @@ void TrapManager::InputDetection()
 			}
 		}
 
-		if (!foundATrap)
+		if (!foundATrap && nbrLavaTrapLeft > 0)
 			CreateTrapdoor(GameManager::Instance().my_registry, pos);
 	}
 	else if (pos.x > 0 && pos.y == 0 && InputManager::Instance().IsPressed("EndSetup"))
@@ -182,7 +212,7 @@ void TrapManager::InputDetection()
 			}
 		}
 
-		if (!foundATrap)
+		if (!foundATrap && nbrArrowWallLeft > 0)
 		CreateArrowWall(GameManager::Instance().my_registry, { pos.x+5, 449 });
 	}
 }
@@ -198,6 +228,8 @@ void TrapManager::CreateTrapdoor(entt::registry& registry, Vector2f pos)
 	sprite->SetOrigin({ 0.5f, 0.5f });
 	sprite->Resize(128, 128);
 	sprite->SetRect(SDL_Rect{ 0, 0, 128, 128 });
+	nbrLavaTrapLeft--;
+	displayLavaTrapNumber = spriteNumberList[nbrLavaTrapLeft];
 
 	entt::entity entity = registry.create();
 	registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
@@ -218,6 +250,9 @@ void TrapManager::CreateArrowWall(entt::registry& registry, Vector2f pos)
 	sprite->SetOrigin({ 0.5f, 0.5f });
 	sprite->Resize(138, 658);
 	sprite->SetRect(SDL_Rect{ 0, 0, 138, 658 });
+	nbrArrowWallLeft--;
+	displayLavaTrapNumber = spriteNumberList[nbrArrowWallLeft];
+
 
 	entt::entity entity = registry.create();
 	registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
