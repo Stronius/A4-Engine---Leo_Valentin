@@ -16,10 +16,10 @@ my_registry(registry)
 
 	my_instance = this;
 	isPause = false;
-	referenceTimerSpawn = 2.f;
+	referenceTimerSpawn = 1.5f;
 	timerSpawn = 1;
 	enemyList = std::vector<Enemy>();
-	nbSpawnEnemyToSpawn = 10;
+	nbSpawnEnemyToSpawn = 15;
 	numEnemy = 0;
 	gameLose = false;
 
@@ -51,18 +51,41 @@ void GameManager::Pause()
 
 void GameManager::Victory()
 {
+	std::cout << "Victory" << std::endl;
 	isPause = true;
+	phaseAttack = false;
+
+
 	//Afficher le sprite de win
+	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Victoire.png"), 3);
+	entt::entity entity = my_registry.create();
+	sprite->SetOrigin({ 0.5f, 0.5f });
+	sprite->SetColor(0, 1, 0, 1);
+	my_registry.emplace<GraphicsComponent>(entity, std::move(sprite));
+	auto& transform = my_registry.emplace<Transform>(entity);
+	transform.SetPosition({800, 450});
 }
 
 void GameManager::Lose()
 {
 	isPause = true;
+
+
 	//Afficher le sprite de lose
+	std::shared_ptr<Sprite> sprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Defaite.png"), 3);
+	entt::entity entity = my_registry.create();
+	sprite->SetOrigin({ 0.5f, 0.5f });
+	sprite->SetColor(1, 0, 0, 1);
+	my_registry.emplace<GraphicsComponent>(entity, std::move(sprite));
+	auto& transform = my_registry.emplace<Transform>(entity);
+	transform.SetPosition({ 800, 450 });
+
 }
 
 void GameManager::EnemiesMovement(float deltaTime)
 {
+	bool checkForWin = true;
+
 	auto view = my_registry.view<Enemy,Transform>();
 	for (entt::entity entity : view)
 	{
@@ -70,7 +93,13 @@ void GameManager::EnemiesMovement(float deltaTime)
 		Transform& enemyTransform = view.get<Transform>(entity);
 		enemyScript.Update(deltaTime);
 		enemyTransform = enemyScript.myTransform;
+
+		if (!enemyScript.isDying)
+			checkForWin = false;
 	}
+
+	if (checkForWin && numEnemy >= 15)
+		Victory();
 }
 
 void GameManager::CheckForSpawn(float deltaTime)

@@ -37,8 +37,8 @@ void RenderSystem::Update(float /*deltaTime*/)
 
 	auto view = m_registry.view<Transform, GraphicsComponent>();
 
-	int i = -3;
-	while (i < 3)
+	int i = -5;
+	while (i <= 5)
 	{
 		for (entt::entity entity : view)
 		{
