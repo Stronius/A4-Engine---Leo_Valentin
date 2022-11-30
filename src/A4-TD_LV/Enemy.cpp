@@ -11,7 +11,7 @@ Enemy::Enemy(Vector2f pos, entt::entity entity, int num)
 	myPosition = Vector2f(0, 0);
 	moveForward = true;
 	currentWaypoint = 0;
-	moveSpeed = 1.f;
+	moveSpeed = 1.4f;
 	isDying = false;
 	myEntity = entity;
 	myNum = num;

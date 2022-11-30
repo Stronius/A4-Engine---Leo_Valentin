@@ -9,7 +9,6 @@
 class GameManager
 {
 	public:
-
 		bool isPause;
 		entt::registry& my_registry;
 		float referenceTimerSpawn;

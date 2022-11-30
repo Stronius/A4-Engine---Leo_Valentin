@@ -8,6 +8,12 @@
 #include <A4Engine/Transform.hpp>
 #include <A4Engine/Color.hpp>
 #include <A4Engine/Sprite.hpp>
+#include <fmt/color.h>
+#include <fmt/core.h>
+#include <fmt/std.h>
+#include <nlohmann/json.hpp>
+#include <cassert>
+#include <fstream>
 #include <iostream>
 
 TrapManager::TrapManager()
@@ -52,6 +58,9 @@ TrapManager::TrapManager()
 	InputManager::Instance().BindKeyPressed(SDLK_RETURN, "Validate");
 	InputManager::Instance().BindKeyPressed(SDLK_LSHIFT, "EndSetup1");
 
+	InputManager::Instance().BindKeyPressed(SDLK_LCTRL, "Conf");
+	InputManager::Instance().BindKeyPressed(SDLK_c, "Save");
+	InputManager::Instance().BindKeyPressed(SDLK_v, "Load");
 
 	nbrLavaTrapLeft = 12;
 	nbrArrowWallLeft = 3;
@@ -118,6 +127,11 @@ void TrapManager::SetupPhase(float deltaTime)
 	}
 
 	InputDetectionPlace();
+
+	if (InputManager::Instance().IsActive("Conf") && InputManager::Instance().IsPressed("Save"))
+		SaveConfiguration();
+	else if (InputManager::Instance().IsActive("Conf") && InputManager::Instance().IsPressed("Load"))
+		LoadConfiguration();
 }
 
 void TrapManager::AttackPhase(float deltaTime)
@@ -294,6 +308,14 @@ void TrapManager::InputDetectionActivate()
 
 void TrapManager::CreateTrapdoor(entt::registry& registry, Vector2f pos)
 {
+	if (nbrLavaTrapLeft > 0)
+	{
+		nbrLavaTrapLeft--;
+		registry.get<GraphicsComponent>(displayLavaTrapNumber).renderable = spriteNumberList[nbrLavaTrapLeft];
+	}
+	else
+		return;
+
 	std::shared_ptr<Spritesheet> spritesheet = std::make_shared<Spritesheet>();
 	spritesheet->AddAnimation("Idle", 1, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
 	spritesheet->AddAnimation("Open", 5, 100, Vector2i{ 0, 0 }, Vector2i{ 128, 128 });
@@ -303,15 +325,13 @@ void TrapManager::CreateTrapdoor(entt::registry& registry, Vector2f pos)
 	sprite->SetOrigin({ 0.5f, 0.5f });
 	sprite->Resize(128, 128);
 	sprite->SetRect(SDL_Rect{ 0, 0, 128, 128 });
-	nbrLavaTrapLeft--;
-	registry.get<GraphicsComponent>(displayLavaTrapNumber).renderable = spriteNumberList[nbrLavaTrapLeft];
 
 
 	entt::entity entity = registry.create();
 	registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
 	registry.emplace<GraphicsComponent>(entity, std::move(sprite));
 	auto& transform = registry.emplace<Transform>(entity);
-	auto& trap = registry.emplace<Trap>(entity, entity, Vector2f(64.f, 64.f), 4, 4);
+	auto& trap = registry.emplace<Trap>(entity, entity, Vector2f(64.f, 64.f), 3, 6);
 	trap.myPosition = pos;
 	transform.SetPosition(pos);
 
@@ -320,6 +340,14 @@ void TrapManager::CreateTrapdoor(entt::registry& registry, Vector2f pos)
 
 void TrapManager::CreateArrowWall(entt::registry& registry, Vector2f pos)
 {
+	if (nbrArrowWallLeft > 0)
+	{
+		nbrArrowWallLeft--;
+		registry.get<GraphicsComponent>(displayArrowWallTrapNumber).renderable = spriteNumberList[nbrArrowWallLeft];
+	}
+	else
+		return;
+
 	std::shared_ptr<Spritesheet> spritesheet = std::make_shared<Spritesheet>();
 	spritesheet->AddAnimation("Idle", 2, 100, Vector2i{ 0, 0 }, Vector2i{ 138, 658 });
 	spritesheet->AddAnimation("Open", 5, 100, Vector2i{ 138, 0 }, Vector2i{ 138, 658 });
@@ -329,16 +357,13 @@ void TrapManager::CreateArrowWall(entt::registry& registry, Vector2f pos)
 	sprite->SetOrigin({ 0.5f, 0.5f });
 	sprite->Resize(138, 658);
 	sprite->SetRect(SDL_Rect{ 0, 0, 138, 658 });
-	nbrArrowWallLeft--;
-	registry.get<GraphicsComponent>(displayArrowWallTrapNumber).renderable = spriteNumberList[nbrArrowWallLeft];
-
 
 
 	entt::entity entity = registry.create();
 	registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
 	registry.emplace<GraphicsComponent>(entity, std::move(sprite));
 	auto& transform = registry.emplace<Transform>(entity);
-	auto& trap = registry.emplace<Trap>(entity, entity, Vector2f( 64, 900 ), 1, 5);
+	auto& trap = registry.emplace<Trap>(entity, entity, Vector2f( 64, 900 ), 0.5, 8);
 	trap.myPosition = pos;
 	transform.SetPosition(pos);
 
@@ -354,4 +379,65 @@ void TrapManager::CreateSelectedIcon(entt::registry& registry, Vector2f pos)
 	auto& transform = registry.emplace<Transform>(entity);
 	selectedIcon.push_back(graphic);
 	transform.SetPosition(pos);
+}
+
+void TrapManager::SaveConfiguration()
+{
+	//Stocker les coord de mes traps ainsi que leur type de trap (trapdoor ou arrowwall)
+
+
+	// Ouverture d'un fichier en écriture
+	std::ofstream outputFile("assets/SaveConf/Save01.json");
+
+	nlohmann::ordered_json doc;
+
+	nlohmann::ordered_json& vertices = doc["position"];
+	for (int i = 0; i < trapdoors.size(); i++)
+	{
+		nlohmann::ordered_json& vertex = vertices.emplace_back();
+
+		nlohmann::ordered_json& pos = vertex["pos"];
+		pos["x"] = GameManager::Instance().my_registry.get<Transform>(trapdoors[i]).GetPosition().x;
+		pos["y"] = GameManager::Instance().my_registry.get<Transform>(trapdoors[i]).GetPosition().y;
+
+		if (GameManager::Instance().my_registry.get<Transform>(trapdoors[i]).GetPosition().y == 449)
+			pos["id"] = 0;
+		else 
+			pos["id"] = 1;
+	}
+
+	outputFile << doc.dump(4);
+}
+
+void TrapManager::LoadConfiguration()
+{
+	//Clear les traps existant ainsi que faire des CreateArrowWall ou CreateTrapdoor avec comme argument mes coords enregistrer
+
+	for (int i = trapdoors.size() - 1; i >= 0; i--)
+	{
+		auto e = std::find(trapdoors.begin(), trapdoors.end(), trapdoors[i]);
+		trapdoors.erase(e);
+
+		GameManager::Instance().my_registry.destroy(trapdoors[i]);
+	}
+
+	nbrArrowWallLeft = 3;
+	nbrLavaTrapLeft = 12;
+
+	std::ifstream inputFile("assets/SaveConf/Save01.json");
+
+	nlohmann::json doc = nlohmann::json::parse(inputFile);
+
+	const nlohmann::json verticeArray = doc["position"];
+
+	for (const nlohmann::json& vertex : verticeArray)
+	{
+		const nlohmann::json& positionDoc = vertex["pos"];
+		Vector2f pos = Vector2f(positionDoc["x"], positionDoc["y"]);
+
+		if (positionDoc["id"] == 0)
+			CreateArrowWall(GameManager::Instance().my_registry, pos);
+		else
+			CreateTrapdoor(GameManager::Instance().my_registry, pos);
+	}
 }

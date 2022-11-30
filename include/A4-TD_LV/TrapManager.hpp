@@ -24,6 +24,8 @@ class TrapManager
 		void CreateArrowWall(entt::registry& registry, Vector2f pos);
 		void CreateSelectedIcon(entt::registry& registry, Vector2f pos);
 
+		void SaveConfiguration();
+		void LoadConfiguration();
 
 		int nbrLavaTrapLeft;
 		int nbrArrowWallLeft;
