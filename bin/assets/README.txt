@@ -32,10 +32,13 @@ Trappe 		: Appuyer sur la Colonne ou Ligne correspondante
 Lancer la partie  = Shift + R
 Echap = Pause
 Flèche du clavier ou Q/D = Bouge la camera
-1 ou 2 ou 3 ou 4 ou 5 ou 6 ou 7 ou 8 ou 9 ou 0 = selectionne une colonne OU Active tous les trap sur cette colonne
-A ou Z ou E ou R ou T = selectionne une ligne OU Active tous les trap sur cette ligne
+1 ou 2 ou 3 ou 4 ou 5 ou 6 ou 7 ou 8 ou 9 ou 0 = selectionne une colonne (Phase de build) OU Active tous les trap sur cette colonne (Phase Ingame)
+A ou Z ou E ou R ou T = selectionne une ligne (Phase de build) OU Active tous les trap sur cette ligne (Phase InGame)
 
-Déclencher un piège =
+SAUVEGARDE :
+CTRL + C = Sauvegarde (D'abord appuyer sur CTRL puis ensuite sur C, pas en même temps)
+CTRL + V = Load la sauvegarde (D'abord appuyer sur CTRL puis ensuite sur C, pas en même temps)
 
+Déclencher un piège :
 Mur de flèche 	: Appuyer sur la Colonne correspondante
 Trappe 		: Appuyer sur la Colonne ou Ligne correspondante
