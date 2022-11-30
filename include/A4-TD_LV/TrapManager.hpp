@@ -23,8 +23,8 @@ class TrapManager
 
 		int nbrLavaTrapLeft;
 		int nbrArrowWallLeft;
-		std::shared_ptr<Sprite> displayLavaTrapNumber;
-		std::shared_ptr<Sprite> displayArrowWallTrapNumber;
+		entt::entity displayLavaTrapNumber;
+		entt::entity displayArrowWallTrapNumber;
 		std::vector<std::shared_ptr<Sprite>> spriteNumberList;
 
 		enum phases {Setup, Attack};

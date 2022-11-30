@@ -28,21 +28,21 @@ Enemy::~Enemy()
 
 void Enemy::GetKill()
 {
-	if (myTransform.GetScale().x <= 0.5)
+	if (myTransform.GetScale().x <= 0.01)
 	{
-		myTransform.SetPosition(Vector2f(0, 0));
-		myTransform.SetScale(Vector2f(1, 1));
-		GameManager::Instance().my_registry.destroy(myEntity);
-		//GameManager::Instance().my_registry.remove<Enemy>(myEntity); // Fait tuer le mauvais enemy 
+		myTransform.SetPosition(Vector2f(-500, 0));
 	}
 }
 
 void Enemy::ScaleDown(float deltaTime)
 {
-	Vector2f tempScale = myTransform.GetScale() - Vector2f(deltaTime, deltaTime) * 1;
-	myTransform.SetScale(tempScale);
+	if (myTransform.GetScale().x > 0.01)
+	{
+		Vector2f tempScale = myTransform.GetScale() - Vector2f(deltaTime, deltaTime) * 1;
+		myTransform.SetScale(tempScale);
 
-	GetKill();
+		GetKill();
+	}
 }
 
 void Enemy::WaypointsCalculation()

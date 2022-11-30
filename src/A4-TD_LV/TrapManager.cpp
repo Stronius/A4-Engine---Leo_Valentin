@@ -55,27 +55,26 @@ TrapManager::TrapManager()
 
 	for (int i = 0; i < 16; i++)
 	{
-		spriteNumberList.push_back(std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Chiffre" + std::to_string(i) + ".png"), 1));
+		std::shared_ptr<Sprite> tempSprite = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/Chiffre" + std::to_string(i) + ".png"), 1);
+		tempSprite->SetOrigin({ 0.5f, 0.5f });
+		tempSprite->Resize(64, 64);
+		tempSprite->SetRect(SDL_Rect{ 0, 0, 128, 128 });
+		spriteNumberList.push_back(tempSprite);
+		
+
 	}
 
-	displayLavaTrapNumber = spriteNumberList[nbrLavaTrapLeft];
-	displayLavaTrapNumber = spriteNumberList[nbrLavaTrapLeft-5];
-	displayLavaTrapNumber->SetOrigin({ 0.5f, 0.5f });
-	displayLavaTrapNumber->Resize(64, 64);
-	displayLavaTrapNumber->SetRect(SDL_Rect{ 0, 0, 128, 128 });
-	entt::entity entityDisplayLavaTrapNumberIndicator = GameManager::Instance().my_registry.create();
-	GameManager::Instance().my_registry.emplace<GraphicsComponent>(entityDisplayLavaTrapNumberIndicator, std::move(displayLavaTrapNumber));
-	auto& transformDisplayLavaTrapNumberIndicator = GameManager::Instance().my_registry.emplace<Transform>(entityDisplayLavaTrapNumberIndicator);
+	std::shared_ptr<Sprite> tempSpriteLava = spriteNumberList[nbrLavaTrapLeft];
+	displayLavaTrapNumber = GameManager::Instance().my_registry.create();
+	GameManager::Instance().my_registry.emplace<GraphicsComponent>(displayLavaTrapNumber, std::move(tempSpriteLava));
+	auto& transformDisplayLavaTrapNumberIndicator = GameManager::Instance().my_registry.emplace<Transform>(displayLavaTrapNumber);
 	transformDisplayLavaTrapNumberIndicator.SetPosition({ 640+64,64 });
 	
-	displayArrowWallTrapNumber = spriteNumberList[nbrArrowWallLeft];
-	displayArrowWallTrapNumber->SetOrigin({ 0.5f, 0.5f });
-	displayArrowWallTrapNumber->Resize(64, 64);
-	displayArrowWallTrapNumber->SetRect(SDL_Rect{ 0, 0, 128, 128 });
-	entt::entity entityDisplayArrowWallTrapNumberIndicator = GameManager::Instance().my_registry.create();
-	GameManager::Instance().my_registry.emplace<GraphicsComponent>(entityDisplayArrowWallTrapNumberIndicator, std::move(displayArrowWallTrapNumber));
-	auto& transformDisplayArrowWallTrapNumberIndicator = GameManager::Instance().my_registry.emplace<Transform>(entityDisplayArrowWallTrapNumberIndicator);
-	transformDisplayArrowWallTrapNumberIndicator.SetPosition({ 896+64,96 });
+	std::shared_ptr<Sprite> tempSpriteWall = spriteNumberList[nbrArrowWallLeft];
+	displayArrowWallTrapNumber = GameManager::Instance().my_registry.create();
+	GameManager::Instance().my_registry.emplace<GraphicsComponent>(displayArrowWallTrapNumber, std::move(tempSpriteWall));
+	auto& transformDisplayArrowWallTrapNumberIndicator = GameManager::Instance().my_registry.emplace<Transform>(displayArrowWallTrapNumber);
+	transformDisplayArrowWallTrapNumberIndicator.SetPosition({ 992,64 });
 
 
 }
@@ -229,7 +228,8 @@ void TrapManager::CreateTrapdoor(entt::registry& registry, Vector2f pos)
 	sprite->Resize(128, 128);
 	sprite->SetRect(SDL_Rect{ 0, 0, 128, 128 });
 	nbrLavaTrapLeft--;
-	displayLavaTrapNumber = spriteNumberList[nbrLavaTrapLeft];
+	registry.get<GraphicsComponent>(displayLavaTrapNumber).renderable = spriteNumberList[nbrLavaTrapLeft];
+
 
 	entt::entity entity = registry.create();
 	registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
@@ -251,7 +251,8 @@ void TrapManager::CreateArrowWall(entt::registry& registry, Vector2f pos)
 	sprite->Resize(138, 658);
 	sprite->SetRect(SDL_Rect{ 0, 0, 138, 658 });
 	nbrArrowWallLeft--;
-	displayLavaTrapNumber = spriteNumberList[nbrArrowWallLeft];
+	registry.get<GraphicsComponent>(displayArrowWallTrapNumber).renderable = spriteNumberList[nbrArrowWallLeft];
+
 
 
 	entt::entity entity = registry.create();
